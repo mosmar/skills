@@ -1,6 +1,7 @@
 # tech-debt-tracker
 
-A Claude skill that audits code for technical debt and produces a prioritized, actionable markdown report.
+A skill that audits code for technical debt and produces a prioritized, actionable markdown report.
+Works with **Claude Code**, **Cowork**, and **GitHub Copilot** (cloud agent).
 
 ## What it analyzes
 
@@ -11,6 +12,7 @@ A Claude skill that audits code for technical debt and produces a prioritized, a
 
 ## How to trigger it
 
+### Claude Code / Cowork
 Say something like:
 
 - *"Run a tech debt audit on this file"*
@@ -20,6 +22,50 @@ Say something like:
 - *"What's wrong with this code?"*
 
 Works with pasted snippets, attached files, or a whole directory.
+
+### GitHub Copilot (cloud agent)
+After [installing the skill](#github-copilot-cloud-agent), Copilot selects it automatically based on
+your prompt. You can also invoke it explicitly:
+
+- *"Use the tech-debt-tracker skill on src/"*
+- *"Run a tech debt audit on this repository"*
+
+## Installing
+
+### Claude Code
+
+Copy `SKILL.md` to a skills directory Claude Code watches:
+
+```bash
+# Global — available in every project
+cp SKILL.md ~/.claude/skills/tech-debt-tracker.md
+
+# Project-specific — only in that project
+mkdir -p .claude/skills
+cp SKILL.md .claude/skills/tech-debt-tracker.md
+```
+
+Claude Code discovers skills in both locations automatically.
+
+### Cowork
+
+1. Download `SKILL.md` from this folder
+2. Open Settings → Skills → Install from file
+
+### GitHub Copilot (cloud agent)
+
+Copy `SKILL.md` into `.github/skills/tech-debt-tracker/` in your project:
+
+```bash
+mkdir -p .github/skills/tech-debt-tracker
+curl -o .github/skills/tech-debt-tracker/SKILL.md \
+  https://raw.githubusercontent.com/<your-username>/skills/main/tech-debt-tracker/SKILL.md
+```
+
+Copilot discovers skills in `.github/skills/` automatically and picks this one based on your prompt
+and the skill's description. See the
+[GitHub docs](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills)
+for full details on project and personal skill locations.
 
 ## Output
 
@@ -68,5 +114,5 @@ rotating credentials before the next deploy.
 
 | File | Purpose |
 |---|---|
-| `SKILL.md` | Skill definition read by Claude at runtime |
-| `evals/evals.json` | Test cases used during development (Python auth, Node/Express, data processor) |
+| `SKILL.md` | Skill definition — works in Claude Code, Cowork, and GitHub Copilot unchanged |
+| `evals/evals.json` | Test cases used during development |
