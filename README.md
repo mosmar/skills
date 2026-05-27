@@ -9,6 +9,7 @@ Each skill is a self-contained `SKILL.md` file that works with **Claude Code**, 
 | Skill | Description |
 |---|---|
 | [tech-debt-tracker](./tech-debt-tracker/) | Audits code for technical debt across quality, security, dependencies, and test coverage |
+| [log-writer](./log-writer/) | Adds or improves logging using production best practices — right levels, structured output, context, no sensitive data |
 
 ## How to install a skill
 
