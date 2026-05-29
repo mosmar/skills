@@ -1,0 +1,23 @@
+{
+  "skill_name": "prompt-sharpener",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I want to ask Copilot to refactor my auth module but I'm not sure how to phrase it. It's a Node.js Express app, the auth logic is in src/middleware/auth.js and it's gotten really messy — lots of callback hell and no error handling.",
+      "expected_output": "A sharpened, ready-to-paste Copilot prompt that specifies the file, asks for async/await conversion, error handling, and likely includes updating tests as a batched task. Should explain what was added.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "How do I ask Copilot to add logging to my app?",
+      "expected_output": "A sharpened prompt that asks for specific log levels (INFO/WARN/ERROR), structured output, no sensitive data in logs, and references existing patterns if any. Should call out that scope is needed and make reasonable assumptions.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I want to ask Copilot: what does the reduce() method do in JavaScript?",
+      "expected_output": "Should lightly flag this as a docs/search lookup, but still deliver a sharpened prompt if the user wants an agent answer (e.g. with examples relevant to their codebase).",
+      "files": []
+    }
+  ]
+}
