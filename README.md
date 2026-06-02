@@ -11,6 +11,7 @@ Each skill is a self-contained `SKILL.md` file that works with **Claude Code**, 
 | [tech-debt-tracker](./tech-debt-tracker/) | Audits code for technical debt across quality, security, dependencies, and test coverage |
 | [log-writer](./log-writer/) | Adds or improves logging using production best practices — right levels, structured output, context, no sensitive data |
 | [prompt-sharpener](./prompt-sharpener/) | Turns a vague Copilot ask into a tight, ready-to-paste prompt — fewer round trips, fewer premium requests burned |
+| [context-trimmer](./context-trimmer/) | Extracts the minimum viable code slices across files for a specific question — reduces token consumption on multi-file asks |
 
 ## How to install a skill
 
