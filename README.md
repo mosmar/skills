@@ -12,6 +12,12 @@ Each skill is a self-contained `SKILL.md` file that works with **Claude Code**, 
 | [log-writer](./log-writer/) | Adds or improves logging using production best practices — right levels, structured output, context, no sensitive data |
 | [prompt-sharpener](./prompt-sharpener/) | Turns a vague Copilot ask into a tight, ready-to-paste prompt — fewer round trips, fewer premium requests burned |
 | [context-trimmer](./context-trimmer/) | Extracts the minimum viable code slices across files for a specific question — reduces token consumption on multi-file asks |
+| [smell-scanner](./smell-scanner/) | Fast triage pass across all five code smell categories — rates each and routes to the right focused skill |
+| [smell-bloaters](./smell-bloaters/) | Deep analysis of Bloater smells — Long Method, Large Class, Primitive Obsession, Long Parameter List, Data Clumps |
+| [smell-dispensables](./smell-dispensables/) | Deep analysis of Dispensable smells — Duplicate Code, Dead Code, Lazy Class, Comments, Speculative Generality |
+| [smell-couplers](./smell-couplers/) | Deep analysis of Coupler smells — Feature Envy, Inappropriate Intimacy, Message Chains, Middle Man |
+| [smell-oo-abusers](./smell-oo-abusers/) | Deep analysis of OO Abuser smells in JS/TS — Switch Statements, Temporary Field, Refused Bequest, Alternative Classes |
+| [smell-change-preventers](./smell-change-preventers/) | Deep analysis of Change Preventer smells — Divergent Change, Shotgun Surgery, Parallel Inheritance Hierarchies |
 
 ## How to install a skill
 
