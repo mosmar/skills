@@ -1,0 +1,23 @@
+{
+  "skill_name": "smell-guard",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Write a TypeScript service that handles sending notifications. It should support email, SMS, and push notifications. Each channel has slightly different options.",
+      "expected_output": "Should produce code using polymorphism or a strategy pattern (NOT a switch/if-else on channel type). Should use a NotificationChannel interface with separate EmailChannel, SmsChannel, PushChannel implementations. Should NOT have a single sendNotification() method with a big if/else chain. Parameters should be typed objects not raw string/boolean primitives.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "Write a TypeScript class that processes uploaded documents. It needs to parse the file, validate the content, run some transformations, and save the result.",
+      "expected_output": "Should NOT produce a class with nullable fields like _parsedContent: ParsedContent | null that depend on call order. Should either: (a) chain the steps returning results (parse() returns ParsedContent, validate(content) returns ValidationResult), or (b) use a pipeline/state machine approach. Should NOT have a single process() method doing all four steps. Each step should be extractable and testable independently.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Add a 'corporate' customer type to this existing discount service:\n\n```typescript\nclass DiscountService {\n  calculate(order: Order): number {\n    if (order.customerType === 'guest') return 0;\n    else if (order.customerType === 'member') return order.subtotal * 0.05;\n    else if (order.customerType === 'premium') return order.subtotal * 0.15;\n    else return 0;\n  }\n}",
+      "expected_output": "Should add 'corporate' to the existing switch (to fulfill the request) but MUST flag the Switch Statement smell and note it's a candidate for Replace Conditional with Polymorphism. Should NOT silently extend the bad pattern without comment. Ideally shows what the refactored version would look like.",
+      "files": []
+    }
+  ]
+}
