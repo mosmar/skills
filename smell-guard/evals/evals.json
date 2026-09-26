@@ -18,6 +18,41 @@
       "prompt": "Add a 'corporate' customer type to this existing discount service:\n\n```typescript\nclass DiscountService {\n  calculate(order: Order): number {\n    if (order.customerType === 'guest') return 0;\n    else if (order.customerType === 'member') return order.subtotal * 0.05;\n    else if (order.customerType === 'premium') return order.subtotal * 0.15;\n    else return 0;\n  }\n}",
       "expected_output": "Should add 'corporate' to the existing switch (to fulfill the request) but MUST flag the Switch Statement smell and note it's a candidate for Replace Conditional with Polymorphism. Should NOT silently extend the bad pattern without comment. Ideally shows what the refactored version would look like.",
       "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Write an Angular component that shows the current user's orders from GET /api/orders, lets them filter by status (pending, shipped, delivered, cancelled), and has a Cancel button on pending orders that calls POST /api/orders/:id/cancel.",
+      "expected_output": "HttpClient calls live in an injectable OrderService (or similarly named single-purpose service), NOT in the component. Order and OrderStatus are typed (OrderStatus as a string-literal union or enum) — no `any`. The filtered list is exposed as a computed signal, pure pipe, or precomputed field — the template does NOT call component methods inside bindings (e.g. no `*ngFor=\"let o of filterOrders()\"` or `{{ canCancel(o) }}`). The rule for which orders can be cancelled is not duplicated between the template and the component. Optionally splits into a container component and a presentational order-list component. No `::ng-deep` or `!important` in styles.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "In our NestJS app, add a POST /orders endpoint that validates the request (customerId, at least one item with productId, quantity and unitPrice, optional promoCode), calculates the total, and saves the order to MongoDB with Mongoose.",
+      "expected_output": "Controller is thin: one handler that delegates to OrdersService and returns its result — no business logic and no @InjectModel in the controller. Validation uses a CreateOrderDto (with a nested item DTO) decorated with class-validator and relies on ValidationPipe — no manual `if (!body.x)` checks. Total calculation lives in the service or a domain function, not the controller. No per-handler try/catch that only converts errors to HTTP responses; errors are thrown as HttpException subclasses or left to an exception filter. Any configuration (e.g. discount rates) comes from ConfigService, not process.env. Order status is a typed union/enum, not a raw string. Uses a feature OrdersModule rather than adding to a shared/common module.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Add a PATCH /orders/:id/cancel route to this Express router. Only pending orders can be cancelled.",
+      "expected_output": "Adds the cancel route with a thin handler that delegates to an extracted service/repository function (e.g. orderService.cancelOrder(id)); the pending-only rule lives in that function or on the model, not inline in the route. Errors for not-found / not-cancellable are passed to next(err) or an error middleware rather than another copy-pasted try/catch with a generic 500. Does NOT rewrite the existing POST /orders handler or migrate the router to NestJS unasked. MUST flag the existing POST handler's smells (inline validation, pricing logic in the route, direct Order.create, magic 'pending' string, per-route try/catch) and sketch the cleaner structure.",
+      "files": [
+        {
+          "path": "routes/orders.js",
+          "content": "const express = require('express');\nconst Order = require('../models/order');\nconst router = express.Router();\n\nrouter.post('/orders', async (req, res) => {\n  try {\n    if (!req.body.customerId) return res.status(400).json({ error: 'customerId required' });\n    if (!req.body.items || !req.body.items.length) return res.status(400).json({ error: 'items required' });\n    let total = 0;\n    for (const item of req.body.items) {\n      total += item.price * item.qty;\n    }\n    if (req.body.promoCode === 'SAVE10') total = total * 0.9;\n    const order = await Order.create({ customerId: req.body.customerId, items: req.body.items, total, status: 'pending' });\n    res.status(201).json(order);\n  } catch (err) {\n    console.error(err);\n    res.status(500).json({ error: 'Something went wrong' });\n  }\n});\n\nmodule.exports = router;\n"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Write a TypeScript helper that formats a Date as DD/MM/YYYY.",
+      "expected_output": "A single small exported function (e.g. formatDate(date: Date): string) using padStart or Intl.DateTimeFormat. Must NOT introduce a class, interface, strategy map, formatter factory, or configuration options for other formats — this checks the skill does not over-engineer trivial tasks. No what-not-why comments.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Our NestJS app uses TypeORM with SQL Server. Add a GET /customers/:id/orders endpoint that returns the customer's orders with their line items, optionally filtered by status. Also add POST /orders/:id/cancel, which sets the order to cancelled and restocks each line item's product quantity.",
+      "expected_output": "Queries live in a repository or data-access service (TypeORM Repository via @InjectRepository), not in the controller. Line items are loaded in one query (relations / leftJoinAndSelect / IN), NOT fetched per order in a loop. No SQL built by string concatenation or template literals — any raw SQL uses parameters. The cancel + restock write runs in a single transaction owned by one service/repository method (dataSource.transaction or QueryRunner), not coordinated by the controller. The pending/cancellable rule and the status values are an enum or typed constants, not repeated raw strings. Responses are mapped to DTOs instead of returning TypeORM entities directly. Does not introduce a different ORM than TypeORM.",
+      "files": []
     }
   ]
 }
