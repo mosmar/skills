@@ -15,7 +15,9 @@ Install skills into a target directory for GitHub Copilot or Claude Code.
 OPTIONS
   -t, --target DIR    Destination directory (default: current working directory)
   -p, --platform STR  copilot (default) or claude
-  -l, --list          List available skills and exit
+      --suite NAME    Install every skill in a suite (see suites.txt), e.g. smell
+      --no-deps       Don't auto-install a suite when its entry-point skill is named
+  -l, --list          List available skills and suites, then exit
   -h, --help          Show this help
 
 SKILLS
@@ -27,6 +29,9 @@ EXAMPLES
 
   # Install all skills into your GitHub profile repo
   ./install.sh --target ~/code/your-username
+
+  # Install a whole suite (smell-scanner plus its five deep-dive skills)
+  ./install.sh --suite smell
 
   # Install a specific skill
   ./install.sh log-writer
@@ -63,17 +68,40 @@ list_skills() {
   done
 }
 
+# suites.txt lines look like "name: skill skill ..."; print the skills for a suite
+suite_skills() {
+  local line
+  line="$(grep -E "^$1:" "$REPO_DIR/suites.txt" 2>/dev/null | head -n 1)" || true
+  [[ -n "$line" ]] && echo $(echo "${line#*:}")
+}
+
+list_suites() {
+  grep -E '^[A-Za-z0-9_-]+:' "$REPO_DIR/suites.txt" 2>/dev/null | cut -d: -f1
+}
+
 # ── argument parsing ──────────────────────────────────────────────────────────
 
 TARGET="$(pwd)"
 PLATFORM="copilot"
 SELECTED=()
+NO_DEPS=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -t|--target)   TARGET="$2"; shift 2 ;;
     -p|--platform) PLATFORM="$2"; shift 2 ;;
-    -l|--list)     echo "Available skills:"; list_skills | sed 's/^/  /'; exit 0 ;;
+    --suite)
+      [[ $# -ge 2 ]] || die "--suite needs a name"
+      members="$(suite_skills "$2")"
+      [[ -n "$members" ]] || die "Unknown suite '$2'. Run --list to see available suites."
+      for m in $members; do SELECTED+=("$m"); done
+      shift 2 ;;
+    --no-deps)     NO_DEPS=1; shift ;;
+    -l|--list)
+      echo "Available skills:"; list_skills | sed 's/^/  /'
+      echo ""; echo "Available suites (--suite NAME):"
+      for s in $(list_suites); do echo "  $s: $(suite_skills "$s")"; done
+      exit 0 ;;
     -h|--help)     usage; exit 0 ;;
     -*) die "Unknown option: $1" ;;
     *)  SELECTED+=("$1"); shift ;;
@@ -101,6 +129,31 @@ else
     [[ $found -eq 1 ]] || die "Unknown skill '$s'. Run --list to see available skills."
     SKILLS+=("$s")
   done
+
+  # Naming a suite's entry-point skill pulls in the rest of the suite
+  if [[ $NO_DEPS -eq 0 ]]; then
+    for suite in $(list_suites); do
+      members="$(suite_skills "$suite")"
+      entry="${members%% *}"
+      for s in "${SKILLS[@]}"; do
+        if [[ "$s" == "$entry" ]]; then
+          for m in $members; do SKILLS+=("$m"); done
+          break
+        fi
+      done
+    done
+  fi
+
+  # De-duplicate, preserving order
+  DEDUPED=()
+  for s in "${SKILLS[@]}"; do
+    dup=0
+    for d in ${DEDUPED[@]+"${DEDUPED[@]}"}; do
+      [[ "$d" == "$s" ]] && { dup=1; break; }
+    done
+    [[ $dup -eq 1 ]] || DEDUPED+=("$s")
+  done
+  SKILLS=("${DEDUPED[@]}")
 fi
 
 # ── install ───────────────────────────────────────────────────────────────────

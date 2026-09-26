@@ -90,29 +90,30 @@ This skill is part of a five-skill deep-dive suite:
 
 ## Installing
 
-### Claude Code
+The scanner recommends running its five sibling skills, so install them together. Naming
+`smell-scanner` (or using `--suite smell`) installs the whole suite from the repo root:
 
 ```bash
-# Global — available in every project
-cp SKILL.md ~/.claude/skills/smell-scanner.md
+# Claude Code — global
+./install.sh --platform claude --target ~/.claude/skills --suite smell
 
-# Project-specific
-mkdir -p .claude/skills
-cp SKILL.md .claude/skills/smell-scanner.md
+# Claude Code — project-specific
+./install.sh --platform claude --target .claude/skills --suite smell
+
+# GitHub Copilot — into the current project's .github/skills/
+./install.sh --suite smell
 ```
 
-### Cowork
+Use `--no-deps` to install `smell-scanner` on its own.
 
-1. Download `SKILL.md` from this folder
-2. Open Settings → Skills → Install from file
+### Manual install (single skill)
 
-### GitHub Copilot (cloud agent)
+Copy each of the six `SKILL.md` files — the scanner alone will point you at skills you
+don't have.
 
-```bash
-mkdir -p .github/skills/smell-scanner
-curl -o .github/skills/smell-scanner/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/smell-scanner/SKILL.md
-```
+- **Claude Code:** `cp <skill>/SKILL.md ~/.claude/skills/<skill>.md`
+- **Cowork:** Settings → Skills → Install from file, once per skill
+- **Copilot:** place each at `.github/skills/<skill>/SKILL.md`
 
 ## Files
 
