@@ -26,8 +26,14 @@ the focused skill.
 
 Works with pasted snippets, single files, or a whole directory.
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
 
+Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
+
+- *"Scan #file:src/services/order.service.ts for code smells"*
+- *"Quick smell audit on src/services/"*
+- *"Any smells in #selection?"*
+- *"Smell check #codebase before I refactor this"*
 - *"Use the smell-scanner skill on src/services/"*
 - *"Run a smell scan on this file"*
 

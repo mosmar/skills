@@ -36,8 +36,16 @@ months.
 - *"This abstraction layer feels unnecessary"*
 - *"There's a bunch of dead code in here, help me find it"*
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
 
+Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
+
+- *"Do a dispensables analysis on src/orders/"*
+- *"What can I delete from #file:src/utils/helpers.ts?"*
+- *"smell-scanner said Dispensables were Moderate, run the smell-dispensables focused pass"*
+- *"We have a lot of duplicate logic in #file:src/services/order.service.ts and #file:src/services/invoice.service.ts"*
+- *"This abstraction layer feels unnecessary — check #selection"*
+- *"There's a bunch of dead code in here, help me find it"*
 - *"Use the smell-dispensables skill on src/services/"*
 
 ## Output

@@ -22,8 +22,13 @@ the type definitions they use. Nothing else.
 - *"Context is too big — extract just the relevant parts for this question"*
 - *"Slice the relevant code from these files for my question about Y"*
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
 
+Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
+
+- *"Trim the context for my question about X — here are my files: #file:src/a.ts #file:src/b.ts"*
+- *"What do I need to include when asking about the retry logic in #file:src/payments/payment.service.ts?"*
+- *"Context is too big — extract just the relevant parts of #codebase for this question"*
 - *"Use the context-trimmer skill — my question is X, here are the files"*
 - *"Trim this context before I send it to another agent"*
 

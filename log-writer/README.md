@@ -32,12 +32,18 @@ Say something like:
 
 Works with a single function, a full file, or an entire NestJS module directory.
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
+
 After [installing the skill](#installing), Copilot selects it automatically. You can also
 invoke it explicitly:
 
 - *"Use the log-writer skill on src/orders/"*
 - *"Add production logging to this NestJS service using log-writer"*
+- *"Add log statements to #file:src/auth/auth.service.ts"*
+- *"Improve the logging in #selection"*
+- *"What should I log in this controller?"*
+- *"Instrument #file:src/orders/orders.service.ts for production observability"*
+- *"Add structured logging with pino"*
 
 ## Installing
 

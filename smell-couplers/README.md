@@ -40,8 +40,16 @@ objects, or a class that seems to exist only to forward calls.
 - *"There are a lot of long accessor chains in this service"*
 - *"This class just delegates everything — is it even needed?"*
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
 
+Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
+
+- *"Do a couplers analysis on #file:src/services/order.service.ts and #file:src/services/customer.service.ts"*
+- *"This method doesn't seem to belong here — check #selection"*
+- *"I keep having to change two files together whenever anything changes"*
+- *"smell-scanner flagged Couplers, run the smell-couplers focused pass"*
+- *"There are a lot of long accessor chains in #file:src/services/billing.service.ts"*
+- *"This class just delegates everything — is it even needed?"*
 - *"Use the smell-couplers skill on src/services/"*
 
 ## Output

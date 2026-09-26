@@ -21,9 +21,15 @@ burning another request. One tight prompt that anticipates the agent's questions
 - *"Optimize my request: [paste your rough ask]"*
 - *"I have a few questions for Copilot, can you batch them?"*
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
 
+Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
+
+- *"Help me ask Copilot to refactor #file:src/auth/auth.module.ts"*
+- *"Sharpen this prompt before I send it: [paste your rough ask]"*
+- *"I want to ask Copilot to add logging — how should I phrase it?"*
 - *"Use the prompt-sharpener skill on this ask: [your rough request]"*
+- *"I have a few questions for Copilot, can you batch them?"*
 - *"Sharpen my Copilot prompt"*
 
 ## Output

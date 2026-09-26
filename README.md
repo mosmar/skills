@@ -50,7 +50,7 @@ curl -o .github/skills/tech-debt-tracker/SKILL.md \
   https://raw.githubusercontent.com/<your-username>/skills/main/tech-debt-tracker/SKILL.md
 ```
 
-Copilot automatically discovers skills in `.github/skills/` and selects the right one based on your prompt and the skill's `description`. See the [GitHub docs](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills) for details.
+Copilot automatically discovers skills in `.github/skills/` and selects the right one based on your prompt and the skill's `description`. The same install works for Copilot agent mode in VS Code — no extra steps. See the [GitHub docs](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills) for details.
 
 ## File format
 

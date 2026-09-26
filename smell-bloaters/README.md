@@ -34,8 +34,15 @@ a function signature that's out of control.
 - *"This function is way too long, help me break it down"*
 - *"Too many parameters in this service — what's the fix?"*
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
 
+Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
+
+- *"Do a bloater analysis on #file:src/services/order.service.ts"*
+- *"This class has too many responsibilities — use smell-bloaters on #selection"*
+- *"smell-scanner said Bloaters were Severe, run the smell-bloaters focused pass"*
+- *"This function is way too long, help me break it down"*
+- *"Too many parameters in #file:src/services/payment.service.ts — what's the fix?"*
 - *"Use the smell-bloaters skill on src/services/order.service.ts"*
 
 ## Output

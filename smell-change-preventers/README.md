@@ -41,8 +41,15 @@ a new variant, or enabling a new channel.
 - *"Do a shotgun surgery analysis on these files"*
 - *"These two class hierarchies always grow together — is that a problem?"*
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
 
+Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
+
+- *"Change preventers analysis on src/users/"*
+- *"Every time I add a new field I touch 6 files — check #codebase for what's wrong"*
+- *"smell-scanner flagged Change Preventers, run the smell-change-preventers focused pass"*
+- *"Do a shotgun surgery analysis on #file:src/users/user.service.ts and #file:src/users/user.controller.ts"*
+- *"These two class hierarchies always grow together — is that a problem?"*
 - *"Use the smell-change-preventers skill on src/"*
 
 ## Output

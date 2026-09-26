@@ -39,8 +39,15 @@ subclass that doesn't really fit its parent.
 - *"This subclass throws Not Implemented on half its methods"*
 - *"These fields are only valid after calling init() — is that a problem?"*
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
 
+Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
+
+- *"OO abusers analysis on #file:src/services/payment.service.ts"*
+- *"I have a big switch statement on a type field in #selection — is this a smell?"*
+- *"smell-scanner said OO Abusers were Severe, run the smell-oo-abusers focused pass"*
+- *"This subclass throws Not Implemented on half its methods"*
+- *"These fields are only valid after calling init() — is that a problem?"*
 - *"Use the smell-oo-abusers skill on src/"*
 
 ## Output

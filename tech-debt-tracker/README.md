@@ -23,12 +23,17 @@ Say something like:
 
 Works with pasted snippets, attached files, or a whole directory.
 
-### GitHub Copilot (cloud agent)
+### GitHub Copilot (VS Code agent mode / cloud agent)
+
 After [installing the skill](#github-copilot-cloud-agent), Copilot selects it automatically based on
 your prompt. You can also invoke it explicitly:
 
 - *"Use the tech-debt-tracker skill on src/"*
 - *"Run a tech debt audit on this repository"*
+- *"Run a tech debt audit on #file:src/auth/auth.py"*
+- *"Tech debt sweep on src/auth/"*
+- *"What needs refactoring in #codebase?"*
+- *"What's wrong with #selection?"*
 
 ## Installing
 
