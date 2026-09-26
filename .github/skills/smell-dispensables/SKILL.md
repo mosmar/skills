@@ -95,9 +95,10 @@ its data. The fix isn't usually to delete the class, but to move behavior in.
 - **Encapsulate Field** — replace public fields with proper accessors to enable future behavior.
 - **Remove Setting Method** — if a field is only set at construction, make it immutable.
 
-**Calibration note:** Not every data class is a smell. DTOs, request/response objects, and
-value objects at system boundaries are often appropriately data-only. The smell applies when
-a class *should* have behavior but has outsourced it all.
+**Calibration note:** Not every data class is a smell. DTOs, request/response objects,
+schemas, entities, and value objects at system boundaries are often appropriately data-only.
+The smell applies when a class *should* have behavior but has outsourced it all — and the
+project's conventions put behavior on that kind of class.
 
 ### 5. Dead Code
 Code that is never executed — unreachable branches, uncalled functions, unused variables,
@@ -137,6 +138,50 @@ anyway when the real requirement arrives.
 - **Remove Parameter** — if a parameter is always the same value, bake in the default and remove it.
 - **Rename Method** — if a method is named for generality it doesn't use (`processEntity` vs `processOrder`), rename it.
 
+## Respect the project baseline
+
+The project's frameworks, libraries, and generated scaffold are the standard you measure
+against — not the subject of the review. Teams move between projects built from the same
+scaffold, so consistency with it outweighs any individual refactoring.
+
+- **Never recommend replacing a framework or library.** Don't suggest swapping the data layer
+  (Mongoose, TypeORM, Prisma, Sequelize, knex, mssql), the web framework (Express, NestJS,
+  Angular), or the validation, logging, HTTP, state-management, or test library — and never an
+  architecture migration such as Express → NestJS. Every refactoring you propose must use what
+  the project already has.
+- **Generated scaffold code is the clean baseline.** If the project was generated from an
+  organization template or CLI, the structure it produces — per-feature module / controller /
+  service / DTO / schema files, gateway wiring, standard folders, base classes, placeholder
+  files — is not a finding, even where it resembles a smell. A freshly generated project should
+  come out clean.
+- **Recognizing the baseline.** Look for conventions documented in `CLAUDE.md`,
+  `.github/copilot-instructions.md`, or a README / standards doc; patterns repeated uniformly
+  across every feature or service; and, when git history is available, files unchanged since
+  the initial generated commit. When unsure whether a pattern is convention, treat it as
+  convention and say so.
+- **Findings target what the team built on top.** Judge added code against the baseline's own
+  shape — a service that has grown well past the scaffold's pattern is a finding; the pattern
+  itself is not.
+- **Convention notes, not findings.** If a baseline convention itself looks like a smell, you
+  may mention it under *Convention notes* in the report: one or two lines on the tradeoff, no
+  severity or effort, and not part of the cleanup order. Changing a convention — or anything
+  that would require a different library — is a standards decision for the team, because it
+  affects consistency across every project built from the same scaffold. Say so.
+
+**Dispensable-specific baseline calibration:**
+- **Lazy Class** — framework modules (a NestJS feature module that only wires providers),
+  DTO classes, and generated module or spec files are not lazy, however thin they look.
+- **Data Class** — Mongoose schemas, ORM entities, and DTOs are data-shaped by design.
+  Suggest moving behavior onto them only where the project already puts behavior on its
+  models (schema methods, entity methods, domain classes). If the scaffold keeps logic in
+  services, that's a convention note at most.
+- **Speculative Generality** — interfaces, base classes, lifecycle hooks, and extension
+  points that ship with the scaffold are not speculative, even with one implementation.
+- **Dead Code** — never recommend deleting scaffold files: placeholder specs, environment
+  and config files, generated barrels and exports, starter hooks. They are unused *yet*,
+  not dead.
+- **Comments** — generated header, license, and doc comments are fine.
+
 ## How to approach the analysis
 
 Dispensables are often subtle — the code works fine, it's just unnecessary. Approach the
@@ -173,6 +218,11 @@ rough cleanup effort]
 [Start with dead code and commented-out blocks — pure removals with no downside.
 Then duplicates — pick the canonical version, update callers. Then lazy/speculative
 abstractions. Data class behavior-migration last since it requires design judgment.]
+
+### Convention notes (not findings)
+[Optional — omit if empty. Baseline conventions or library constraints that resemble a
+smell, one or two lines each on the tradeoff. No severity or effort, not in the cleanup
+order — changing these is a team standards decision.]
 ```
 
 ## Tone

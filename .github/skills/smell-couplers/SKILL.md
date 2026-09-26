@@ -123,7 +123,8 @@ indirection without adding any value. Every method just delegates to another obj
 **Calibration:** Not all delegation is Middle Man. A class that delegates *most* calls but
 adds meaningful behavior on a few is not a Middle Man — it's doing its job. The smell is
 a class that adds no value at all. Facade pattern classes that simplify a complex subsystem
-are also not Middle Men.
+are also not Middle Men, and neither are the framework's standard layers (controller →
+service → repository) — see *Respect the project baseline*.
 
 ### 5. Incomplete Library Class
 A third-party or library class that almost does what you need, but is missing a method or two —
@@ -166,6 +167,49 @@ augmentation for adding *types* to a library, not runtime behavior.
 **Calibration:** A single, well-named helper function over a library is not a smell — it's
 normal, healthy glue. The smell is the *absence* of that consolidation: the same missing
 operation reimplemented ad hoc in many places, or runtime patching of code you don't own.
+
+## Respect the project baseline
+
+The project's frameworks, libraries, and generated scaffold are the standard you measure
+against — not the subject of the review. Teams move between projects built from the same
+scaffold, so consistency with it outweighs any individual refactoring.
+
+- **Never recommend replacing a framework or library.** Don't suggest swapping the data layer
+  (Mongoose, TypeORM, Prisma, Sequelize, knex, mssql), the web framework (Express, NestJS,
+  Angular), or the validation, logging, HTTP, state-management, or test library — and never an
+  architecture migration such as Express → NestJS. Every refactoring you propose must use what
+  the project already has.
+- **Generated scaffold code is the clean baseline.** If the project was generated from an
+  organization template or CLI, the structure it produces — per-feature module / controller /
+  service / DTO / schema files, gateway wiring, standard folders, base classes, placeholder
+  files — is not a finding, even where it resembles a smell. A freshly generated project should
+  come out clean.
+- **Recognizing the baseline.** Look for conventions documented in `CLAUDE.md`,
+  `.github/copilot-instructions.md`, or a README / standards doc; patterns repeated uniformly
+  across every feature or service; and, when git history is available, files unchanged since
+  the initial generated commit. When unsure whether a pattern is convention, treat it as
+  convention and say so.
+- **Findings target what the team built on top.** Judge added code against the baseline's own
+  shape — a service that has grown well past the scaffold's pattern is a finding; the pattern
+  itself is not.
+- **Convention notes, not findings.** If a baseline convention itself looks like a smell, you
+  may mention it under *Convention notes* in the report: one or two lines on the tradeoff, no
+  severity or effort, and not part of the decoupling order. Changing a convention — or
+  anything that would require a different library — is a standards decision for the team,
+  because it affects consistency across every project built from the same scaffold. Say so.
+
+**Coupler-specific baseline calibration:**
+- **Middle Man** — layering the framework or scaffold prescribes is not a Middle Man, even
+  when most methods are one-line delegations: a controller or Express route that forwards to
+  a service, a repository or data-access service over a Mongoose model or ORM repository, an
+  Angular API service over `HttpClient`, a gateway or orchestrator that proxies to
+  microservices. Never recommend removing one of these layers.
+- **Incomplete Library Class** — the fix is always a Foreign Method or Local Extension of the
+  library the project *already* uses, never a switch to a different library.
+- **Message Chains** — Mongoose and ORM query builders and RxJS `pipe()` chains are fluent
+  APIs, not message chains.
+- **Inappropriate Intimacy** — module imports and exports wired the way the scaffold wires
+  them are convention; flag only coupling the team added beyond that.
 
 ## How to approach the analysis
 
@@ -222,6 +266,11 @@ then Feature Envy (move methods to where they belong), then Inappropriate Intima
 most structural change), then Middle Man (often easiest once the others are resolved).
 Incomplete Library Class is usually low effort and high value — consolidating scattered glue
 into a Foreign Method or Local Extension can be done early and independently of the others]
+
+### Convention notes (not findings)
+[Optional — omit if empty. Baseline conventions or library constraints that resemble a
+smell, one or two lines each on the tradeoff. No severity or effort, not in the decoupling
+order — changing these is a team standards decision.]
 ```
 
 ## Tone

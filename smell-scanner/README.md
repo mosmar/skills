@@ -76,6 +76,19 @@ Bloaters are the priority — splitting processOrder will naturally resolve some
 the coupling issues too.
 ```
 
+## Respects your stack
+
+- **Never swaps frameworks or libraries.** Fixes use what the project already has — it won't
+  suggest replacing Mongoose or an ORM, or migrating Express to NestJS.
+- **Generated scaffold code is the clean baseline.** If your project came from an org
+  template or generator, the structure it produces isn't reported as a smell, so a fresh
+  project comes out clean and every project built from the scaffold stays consistent.
+- **Framework patterns don't count toward ratings** — thin controllers, data-shaped
+  schemas and DTOs, per-feature layering, and reducers are expected.
+- **Convention notes, not findings.** If an existing convention itself looks like a smell,
+  it's mentioned separately — unrated and outside the refactoring order — so your team can
+  decide whether to change the standard.
+
 ## The full suite
 
 This skill is part of a five-skill deep-dive suite:

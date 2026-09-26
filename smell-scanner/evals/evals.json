@@ -18,6 +18,41 @@
       "prompt": "Quick smell check on this utils file — it's been around forever and I don't really know what's in it:\n\n```javascript\n// utils.js\n\n// Helper function to format dates\nfunction formatDate(date) {\n  const d = new Date(date);\n  return d.toLocaleDateString();\n}\n\n// TODO: remove this after migration\nfunction formatDateLegacy(date) {\n  return new Date(date).toDateString();\n}\n\nfunction calculateAge(birthdate) {\n  const today = new Date();\n  const birth = new Date(birthdate);\n  let age = today.getFullYear() - birth.getFullYear();\n  const m = today.getMonth() - birth.getMonth();\n  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;\n  return age;\n}\n\n// This is probably not used anymore\nfunction legacyFormatCurrency(amount, currency) {\n  return currency + amount.toFixed(2);\n}\n\nfunction formatCurrency(amount, currency) {\n  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);\n}\n\nfunction capitalize(str) {\n  return str.charAt(0).toUpperCase() + str.slice(1);\n}\n\nfunction truncate(str, maxLength) {\n  if (str.length <= maxLength) return str;\n  return str.slice(0, maxLength - 3) + '...';\n}\n\nfunction isValidEmail(email) {\n  const re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n  return re.test(email);\n}\n\nfunction isEmpty(val) {\n  if (val === null || val === undefined) return true;\n  if (typeof val === 'string') return val.trim() === '';\n  if (Array.isArray(val)) return val.length === 0;\n  if (typeof val === 'object') return Object.keys(val).length === 0;\n  return false;\n}\n```",
       "expected_output": "Should flag: Dispensables (Moderate — formatDateLegacy with TODO comment, legacyFormatCurrency marked probably unused = dead code + explanatory comments). Bloaters and Couplers should be None. OO Abusers likely None. Overall health should be positive — this is mostly clean utility code with a couple of dead functions to trim. Should recommend smell-dispensables as the only needed focused pass.",
       "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Scan src/orders for code smells. This feature was just generated from our org's project scaffold.",
+      "expected_output": "Every category rated None (or at most Mild with a clearly non-baseline example). Should recognize the module/controller/service/schema/DTO layout as the generated baseline and say plainly that the code is essentially clean. Should NOT flag the thin controller as Middle Man, the schema/DTOs as Data Class, the layering as Shotgun Surgery, or the empty spec as Dead Code. Should NOT route to any focused skill. Should NOT suggest replacing Mongoose, NestJS, or class-validator. May optionally include an unrated Convention notes section (e.g. status as a plain string) framed as a team decision.",
+      "files": [
+        {
+          "path": "src/orders/orders.module.ts",
+          "content": "import { Module } from '@nestjs/common';\nimport { MongooseModule } from '@nestjs/mongoose';\nimport { OrdersController } from './orders.controller';\nimport { OrdersService } from './orders.service';\nimport { Order, OrderSchema } from './schemas/order.schema';\n\n@Module({\n  imports: [MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }])],\n  controllers: [OrdersController],\n  providers: [OrdersService],\n})\nexport class OrdersModule {}\n"
+        },
+        {
+          "path": "src/orders/orders.controller.ts",
+          "content": "import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';\nimport { OrdersService } from './orders.service';\nimport { CreateOrderDto } from './dto/create-order.dto';\nimport { UpdateOrderDto } from './dto/update-order.dto';\n\n@Controller('orders')\nexport class OrdersController {\n  constructor(private readonly ordersService: OrdersService) {}\n\n  @Post()\n  create(@Body() dto: CreateOrderDto) { return this.ordersService.create(dto); }\n\n  @Get()\n  findAll() { return this.ordersService.findAll(); }\n\n  @Get(':id')\n  findOne(@Param('id') id: string) { return this.ordersService.findOne(id); }\n\n  @Patch(':id')\n  update(@Param('id') id: string, @Body() dto: UpdateOrderDto) { return this.ordersService.update(id, dto); }\n\n  @Delete(':id')\n  remove(@Param('id') id: string) { return this.ordersService.remove(id); }\n}\n"
+        },
+        {
+          "path": "src/orders/orders.service.ts",
+          "content": "import { Injectable, NotFoundException } from '@nestjs/common';\nimport { InjectModel } from '@nestjs/mongoose';\nimport { Model } from 'mongoose';\nimport { Order, OrderDocument } from './schemas/order.schema';\nimport { CreateOrderDto } from './dto/create-order.dto';\nimport { UpdateOrderDto } from './dto/update-order.dto';\n\n@Injectable()\nexport class OrdersService {\n  constructor(@InjectModel(Order.name) private readonly orderModel: Model<OrderDocument>) {}\n\n  create(dto: CreateOrderDto) { return this.orderModel.create(dto); }\n\n  findAll() { return this.orderModel.find().lean().exec(); }\n\n  async findOne(id: string) {\n    const order = await this.orderModel.findById(id).lean().exec();\n    if (!order) throw new NotFoundException(`Order ${id} not found`);\n    return order;\n  }\n\n  async update(id: string, dto: UpdateOrderDto) {\n    const order = await this.orderModel.findByIdAndUpdate(id, dto, { new: true }).lean().exec();\n    if (!order) throw new NotFoundException(`Order ${id} not found`);\n    return order;\n  }\n\n  async remove(id: string) {\n    const order = await this.orderModel.findByIdAndDelete(id).lean().exec();\n    if (!order) throw new NotFoundException(`Order ${id} not found`);\n  }\n}\n"
+        },
+        {
+          "path": "src/orders/schemas/order.schema.ts",
+          "content": "import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';\nimport { HydratedDocument } from 'mongoose';\n\nexport type OrderDocument = HydratedDocument<Order>;\n\n@Schema({ timestamps: true })\nexport class Order {\n  @Prop({ required: true }) customerId: string;\n  @Prop({ required: true }) total: number;\n  @Prop({ required: true }) status: string;\n}\n\nexport const OrderSchema = SchemaFactory.createForClass(Order);\n"
+        },
+        {
+          "path": "src/orders/dto/create-order.dto.ts",
+          "content": "import { IsNotEmpty, IsNumber, IsString } from 'class-validator';\n\nexport class CreateOrderDto {\n  @IsString() @IsNotEmpty() customerId: string;\n  @IsNumber() total: number;\n  @IsString() status: string;\n}\n"
+        },
+        {
+          "path": "src/orders/dto/update-order.dto.ts",
+          "content": "import { PartialType } from '@nestjs/mapped-types';\nimport { CreateOrderDto } from './create-order.dto';\n\nexport class UpdateOrderDto extends PartialType(CreateOrderDto) {}\n"
+        },
+        {
+          "path": "src/orders/orders.service.spec.ts",
+          "content": "import { Test } from '@nestjs/testing';\nimport { OrdersService } from './orders.service';\n\ndescribe('OrdersService', () => {\n  it.todo('should be defined');\n});\n"
+        }
+      ]
     }
   ]
 }

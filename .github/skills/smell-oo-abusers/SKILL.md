@@ -59,7 +59,8 @@ Always prefer exhaustive `switch` with a `never` default assertion over open-end
 chains — the compiler will catch missing cases.
 
 **Calibration:** Not every `switch` is a smell. Switching on a value to format output, map
-data, or handle a fixed set of external codes (HTTP status codes, keyboard keys) is fine.
+data, handle a fixed set of external codes (HTTP status codes, keyboard keys), or dispatch
+actions in a reducer is fine.
 The smell is a `switch` on a *domain type* that determines *behavior* — especially when
 that switch appears in more than one place.
 
@@ -137,6 +138,49 @@ happens when different developers built similar things without coordination.
 - **Move Method** — if one class has the right interface and the other doesn't, move the
   duplicate logic into the correctly-named class.
 
+## Respect the project baseline
+
+The project's frameworks, libraries, and generated scaffold are the standard you measure
+against — not the subject of the review. Teams move between projects built from the same
+scaffold, so consistency with it outweighs any individual refactoring.
+
+- **Never recommend replacing a framework or library.** Don't suggest swapping the data layer
+  (Mongoose, TypeORM, Prisma, Sequelize, knex, mssql), the web framework (Express, NestJS,
+  Angular), or the validation, logging, HTTP, state-management, or test library — and never an
+  architecture migration such as Express → NestJS. Every refactoring you propose must use what
+  the project already has.
+- **Generated scaffold code is the clean baseline.** If the project was generated from an
+  organization template or CLI, the structure it produces — per-feature module / controller /
+  service / DTO / schema files, gateway wiring, standard folders, base classes, placeholder
+  files — is not a finding, even where it resembles a smell. A freshly generated project should
+  come out clean.
+- **Recognizing the baseline.** Look for conventions documented in `CLAUDE.md`,
+  `.github/copilot-instructions.md`, or a README / standards doc; patterns repeated uniformly
+  across every feature or service; and, when git history is available, files unchanged since
+  the initial generated commit. When unsure whether a pattern is convention, treat it as
+  convention and say so.
+- **Findings target what the team built on top.** Judge added code against the baseline's own
+  shape — a service that has grown well past the scaffold's pattern is a finding; the pattern
+  itself is not.
+- **Convention notes, not findings.** If a baseline convention itself looks like a smell, you
+  may mention it under *Convention notes* in the report: one or two lines on the tradeoff, no
+  severity or effort, and not part of the refactoring order. Changing a convention — or
+  anything that would require a different library — is a standards decision for the team,
+  because it affects consistency across every project built from the same scaffold. Say so.
+
+**OO Abuser-specific baseline calibration:**
+- **Switch Statements** — switches the framework or state library expects are not smells:
+  reducers that switch on `action.type`, error-mapping middleware and exception filters,
+  microservice message-pattern dispatch, HTTP status mapping.
+- **Refused Bequest** — implementing framework lifecycle interfaces (`OnInit`,
+  `OnModuleInit`, `CanActivate`) or extending a scaffold base class with no-op hooks is
+  convention, not a refused bequest.
+- **Alternative Classes** — align names to the convention the project already uses
+  (`findAll` / `findOne` / `create` if that's what the scaffold generates), not a new one.
+- **Fix style** — propose polymorphism, discriminated unions, or strategy maps in the style
+  the codebase already uses. Don't introduce a class hierarchy into code that is
+  consistently functional, or vice versa.
+
 ## Output format
 
 ```
@@ -166,6 +210,11 @@ happens when different developers built similar things without coordination.
 ### Refactoring order
 [Which to tackle first. Switch Statements are usually highest priority — they spread. Refused
 Bequest and Alternative Classes are often lower effort. Temporary Field depends on severity.]
+
+### Convention notes (not findings)
+[Optional — omit if empty. Baseline conventions or library constraints that resemble a
+smell, one or two lines each on the tradeoff. No severity or effort, not in the refactoring
+order — changing these is a team standards decision.]
 ```
 
 Always include before/after sketches for Switch Statement findings — the polymorphism

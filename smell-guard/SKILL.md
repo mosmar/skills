@@ -39,6 +39,15 @@ Over-engineering is a smell too.
   user describes as throwaway don't need the full treatment — keep them readable.
 - **The repo wins.** If the project's lint config or established conventions contradict a
   rule here, follow the project and mention the conflict.
+- **The scaffold is the standard.** If the project was generated from an organization
+  template or CLI, its generated structure, naming, folder layout, and libraries are the
+  pattern new code follows — teams move between projects built from the same scaffold, and
+  consistency beats any individual rule here. Don't refactor freshly generated code unless
+  asked. If a convention looks like a smell, follow it anyway and mention it once; changing
+  it is the team's decision.
+- **Never swap a framework or library.** Use the data layer (Mongoose, TypeORM, Prisma,
+  Sequelize, knex, mssql), validation, logging, HTTP, state-management, and test libraries
+  the project already has. Don't add a new one to solve a smell.
 - **Brownfield is not a rewrite.** In existing code (e.g. a legacy Express app), match its
   structure, write the *new* code cleanly, and flag surrounding smells per
   "When editing code that already has smells". Never migrate architecture (e.g. Express →
@@ -64,15 +73,19 @@ createUser(email, firstName, lastName, role, birthDate)
 ```
 Never use a boolean flag parameter to change behavior — that's two functions pretending to be one.
 
-**Primitive Obsession.** Use types, not raw primitives, for domain concepts. A `string`
-for an email, ID, phone number, monetary amount, status, or role carries no validation and
-no meaning at the type level. Wrap them:
+**Primitive Obsession.** Use types, not raw primitives, for domain concepts. A raw `string`
+for a status or role invites typos and magic values — use an enum or string-literal union
+(`type OrderStatus = 'pending' | 'shipped'`), shared by the schema and the code. Go further
+only in the idiom the project already uses: if it has value objects or branded types, use
+them for emails, IDs, and money:
 ```typescript
 type UserId = string & { readonly _brand: 'UserId' };
 class EmailAddress { constructor(readonly value: string) {
   if (!value.includes('@')) throw new Error('Invalid email');
 }}
 ```
+If it doesn't, don't introduce them — plain `string` fields in schemas, entities, and DTOs
+are fine.
 
 **Data Clumps.** If the same 3+ values always appear together across multiple function
 signatures or class fields, they belong in a named type. `firstName + lastName + email`
@@ -162,10 +175,12 @@ of logic means two places for bugs and two places to update.
 **Lazy Class.** Do not create a class with only one non-trivial method or that exists
 purely to wrap a single call. Every class adds cognitive overhead — it must justify that
 cost. If the class doesn't encapsulate a meaningful concept, inline it into its caller.
+Framework and scaffold units (a feature module, a DTO, a generated spec) justify themselves.
 
 **Data Class.** Do not create classes with only fields and getters/setters and no behavior.
 If you're building a class whose data is always manipulated by external methods in other
 classes, move that behavior in. Objects should own their own invariants and transformations.
+Schemas, entities, and DTOs are exempt when the project keeps their logic in services.
 
 **Dead Code.** Do not leave dead code behind — no commented-out blocks, no methods marked
 "unused", no `TODO: remove this`. Delete it. Version control remembers it.
@@ -206,14 +221,18 @@ If you need data that's three objects deep, add a method on the nearest object.
 **Middle Man.** Do not create a class whose primary job is forwarding calls to another
 class. If every method is a one-liner delegating to a single dependency, the class adds
 indirection without value. Either inline it or give it real responsibilities of its own.
+The layers the framework or scaffold prescribes (controller → service → repository, an API
+service over `HttpClient`) are not Middle Men — keep them.
 
 ---
 
 ## Stack specifics — Angular, NestJS, Express, MongoDB, MSSQL
 
-The rules above apply everywhere. These are how they show up in this stack. Match the
-Angular/NestJS/Express version the project already uses — don't introduce newer APIs
-(signals, standalone components) into a codebase that doesn't use them yet.
+The rules above apply everywhere. These are how they show up in this stack. They are
+defaults: where the project's scaffold or established conventions do something differently,
+the project wins. Match the Angular/NestJS/Express version the project already uses — don't
+introduce newer APIs (signals, standalone components) into a codebase that doesn't use them
+yet.
 
 ### Angular
 
@@ -257,13 +276,14 @@ exception filter. No per-handler try/catch that only converts errors to response
 **Cross-cutting concerns use the framework** (Shotgun Surgery). Auth, logging, caching, and
 response shaping go in guards, interceptors, and pipes — not copied into each handler.
 
-**Config has one home** (Shotgun Surgery). Read configuration via `ConfigModule` /
-`ConfigService` (ideally a typed config namespace), never `process.env` scattered across
-providers.
+**Config has one home** (Shotgun Surgery). Read configuration through the project's existing
+config mechanism — `ConfigModule` / `ConfigService` (ideally a typed config namespace) or the
+scaffold's own config module — never `process.env` scattered across providers.
 
 **Modules follow features** (Large Class, Inappropriate Intimacy). One module per feature,
-exporting only what other modules need. No god `SharedModule` / `CommonModule` that
-everything imports. A `forwardRef()` circular dependency is a smell — extract the shared
+exporting only what other modules need. Don't grow a god `SharedModule` / `CommonModule`
+that everything imports — if the scaffold provides a shared module, use it as intended, but
+don't pile feature logic into it. A `forwardRef()` circular dependency is a smell — extract the shared
 piece into its own provider or module rather than papering over it.
 
 **Providers respect the dependency limit.** The ~4 injected-dependency ceiling applies to
@@ -292,7 +312,9 @@ existing handlers as they are, and flag them with a sketch of the fix.
 
 ### Data access (MongoDB or MSSQL, both backends)
 
-Use whatever data layer the project already has — don't introduce a new ORM or driver.
+Use whatever data layer the project already has — don't introduce a new ORM, ODM, query
+builder, or driver, and don't replace Mongoose or an existing ORM to make a rule easier to
+follow.
 
 **Queries have one home** (Shotgun Surgery). All queries for a collection or table live in
 one place — a repository or data-access service. Controllers, routes, and unrelated
@@ -315,9 +337,10 @@ logic. Load it in one query — a join, `populate`, `relations`/`include`, or `I
 
 - **Where queries live:** a service or repository using `@InjectModel` in NestJS; a
   repository module or model statics in Express. No `Model.find()` elsewhere.
-- **Documents own their behavior** (Data Class, Feature Envy). Logic that reads and
-  changes a single document's fields (`order.cancel()`, `user.isLockedOut()`) belongs in
-  schema methods or a domain class, not in every caller.
+- **Document logic has one home** (Data Class, Feature Envy). Logic that reads and
+  changes a single document's fields (`cancel`, `isLockedOut`) lives in one place, not in
+  every caller. Put it where the project already puts it — schema methods or a domain class
+  if the project uses them, otherwise the feature's service.
 
 #### MSSQL (SQL Server)
 
@@ -328,8 +351,9 @@ logic. Load it in one query — a join, `populate`, `relations`/`include`, or `I
 - **Always parameterized.** Never build SQL by concatenating or interpolating values into
   a string. Use the ORM, a query builder, or `request.input(...)` parameters. The same
   rule applies to raw queries inside the repository.
-- **Entities aren't data bags** (Data Class). Behavior that belongs to a row
-  (`order.cancel()`) goes on the entity or a domain class, not in the callers.
+- **Row logic has one home** (Data Class). Behavior that belongs to a row (`cancel`) lives
+  in one place, not in the callers — on the entity or a domain class if the project does
+  that, otherwise the feature's service or repository.
 - **Transactions are one unit** (Shotgun Surgery). A multi-step write that must succeed or
   fail together lives in one service or repository method that owns the transaction —
   callers don't open, pass around, or commit transactions themselves.
@@ -340,6 +364,12 @@ logic. Load it in one query — a join, `populate`, `relations`/`include`, or `I
 ---
 
 ## When editing code that already has smells
+
+First tell a **convention** from a **smell**. A pattern that comes from the project's
+scaffold or is applied uniformly across the codebase is a convention: follow it in your new
+code, don't refactor it, and at most mention it in one line if it looks like a smell —
+changing it is the team's decision. Everything below applies to smells the team added on
+top of that baseline.
 
 Do not silently spread an existing bad pattern. If the code you're editing contains a
 smell and the user's request requires you to extend it:
@@ -396,6 +426,11 @@ sketch the cleaner structure.
 - [ ] Data access: queries live in one repository per collection/table; no DB calls in controllers or routes; no queries inside loops
 - [ ] Data access: no documents/entities returned directly from the API; no repeated magic field, column, or status strings
 - [ ] MSSQL: no string-built SQL — parameterized only; multi-step writes own their transaction in one method
+
+**Baseline**
+- [ ] No new framework or library introduced; no existing one replaced
+- [ ] Generated or scaffold code left untouched unless the user asked
+- [ ] New code matches the project's existing structure, naming, and folder layout
 
 **Proportionality**
 - [ ] Nothing added that the task doesn't need — the simplest structure that avoids the smells above

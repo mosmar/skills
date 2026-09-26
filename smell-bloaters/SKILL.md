@@ -48,7 +48,7 @@ different object.
 **Signals to look for:**
 - Fields that cluster into groups — some methods use fields A/B/C, others use D/E/F, they never mix
 - God objects that know about everything (User class with auth, profile, billing, preferences all in one)
-- Classes named with vague words like Manager, Processor, Handler, Service (sometimes a sign of responsibility accumulation)
+- Classes named with vague words like Manager, Processor, Handler (sometimes a sign of responsibility accumulation) — framework-mandated suffixes like `Service` or `Controller` don't count
 - Very high method count (>15-20 public methods on a non-trivial class)
 
 **Named refactoring techniques:**
@@ -105,6 +105,47 @@ If you removed one item from the group, the others would lose their meaning.
 - **Extract Class** — give the clump a home. The resulting class often naturally attracts related behavior too.
 - **Introduce Parameter Object** — when the clump appears in method signatures.
 
+## Respect the project baseline
+
+The project's frameworks, libraries, and generated scaffold are the standard you measure
+against — not the subject of the review. Teams move between projects built from the same
+scaffold, so consistency with it outweighs any individual refactoring.
+
+- **Never recommend replacing a framework or library.** Don't suggest swapping the data layer
+  (Mongoose, TypeORM, Prisma, Sequelize, knex, mssql), the web framework (Express, NestJS,
+  Angular), or the validation, logging, HTTP, state-management, or test library — and never an
+  architecture migration such as Express → NestJS. Every refactoring you propose must use what
+  the project already has.
+- **Generated scaffold code is the clean baseline.** If the project was generated from an
+  organization template or CLI, the structure it produces — per-feature module / controller /
+  service / DTO / schema files, gateway wiring, standard folders, base classes, placeholder
+  files — is not a finding, even where it resembles a smell. A freshly generated project should
+  come out clean.
+- **Recognizing the baseline.** Look for conventions documented in `CLAUDE.md`,
+  `.github/copilot-instructions.md`, or a README / standards doc; patterns repeated uniformly
+  across every feature or service; and, when git history is available, files unchanged since
+  the initial generated commit. When unsure whether a pattern is convention, treat it as
+  convention and say so.
+- **Findings target what the team built on top.** Judge added code against the baseline's own
+  shape — a service that has grown well past the scaffold's pattern is a finding; the pattern
+  itself is not.
+- **Convention notes, not findings.** If a baseline convention itself looks like a smell, you
+  may mention it under *Convention notes* in the report: one or two lines on the tradeoff, no
+  severity or effort, and not part of the refactoring order. Changing a convention — or
+  anything that would require a different library — is a standards decision for the team,
+  because it affects consistency across every project built from the same scaffold. Say so.
+
+**Bloater-specific baseline calibration:**
+- **Primitive Obsession** — `string` and `number` fields in schemas, entities, and DTOs are
+  normal. When a status, role, or type really is a magic string, fix it with the project's
+  existing idiom (an enum, a string-literal union, an existing value object) inside the
+  current schema or entity. Don't introduce branded types or value-object patterns the
+  project doesn't already use.
+- **Large Class** — the framework's `Service` / `Controller` / `Module` / `Component` naming
+  is convention, not a signal. Judge by responsibility only.
+- **Data Clumps** — the same fields appearing in a schema or entity and its create/update
+  DTOs is the framework's layering, not a clump.
+
 ## How to approach the analysis
 
 Read the code methodically. For each class and method, ask:
@@ -148,6 +189,11 @@ billing (lines 137–201) — extract into `AuthService`, `UserProfileService`, 
 ---
 ### Refactoring order
 [Numbered list: which to tackle first and why — usually ordered by impact/effort ratio]
+
+### Convention notes (not findings)
+[Optional — omit if empty. Baseline conventions or library constraints that resemble a
+smell, one or two lines each on the tradeoff. No severity or effort, not in the refactoring
+order — changing these is a team standards decision.]
 ```
 
 Include before/after sketches for findings where the refactoring direction isn't obvious.

@@ -84,7 +84,7 @@ flowchart LR
 | **Bloaters** | Long Method | One job per function. A section comment (`// validate`) means extract a function |
 | | Large Class | Name the single responsibility first. More than ~4 injected dependencies is too many |
 | | Long Parameter List | Max 3–4 params, then use a parameter object. No boolean flag params |
-| | Primitive Obsession | Branded types or value classes for IDs, emails, money and statuses |
+| | Primitive Obsession | Enums or string-literal unions for statuses and roles. Branded types or value classes only if the project already uses them |
 | | Data Clumps | 3+ values that always travel together become a named type |
 | **OO Abusers** | Switch Statements | No repeated `if/else` or `switch` on type/kind/role. Use polymorphism, a discriminated union with an exhaustive check, or a strategy map |
 | | Temporary Field | No fields that are only valid after some method runs. Return values instead |
@@ -94,15 +94,15 @@ flowchart LR
 | | Shotgun Surgery | Each concept has one home, not 5+ files to edit |
 | | Parallel Hierarchies | No `XxxNotification` + `XxxHandler` pairs growing in lockstep |
 | **Dispensables** | Duplicate Code | Write logic once. Put the variation in a parameter |
-| | Lazy Class | No class that only wraps a single call |
-| | Data Class | Objects own their behavior, not just getters and setters |
+| | Lazy Class | No class that only wraps a single call (framework units like feature modules and DTOs are exempt) |
+| | Data Class | Objects own their behavior, not just getters and setters (schemas, entities and DTOs follow the project's convention) |
 | | Dead Code | No commented-out blocks or unused methods |
 | | Speculative Generality | No abstraction until the second real case exists |
 | | Comments | Comments explain *why*, never *what* |
 | **Couplers** | Feature Envy | A method that mostly uses another object's data moves to that object |
 | | Inappropriate Intimacy | No reaching into another class's internals |
 | | Message Chains | Max one hop: `order.getShippingCity()`, not `order.getCustomer().getAddress().getCity()` |
-| | Middle Man | No class that only forwards calls |
+| | Middle Man | No class that only forwards calls (the framework's controller → service → repository layers are kept) |
 
 ### Stack specifics
 
@@ -118,21 +118,22 @@ flowchart LR
 | | `class-validator` DTOs + `ValidationPipe`, no manual checks | Duplicate Code |
 | | Throw `HttpException` subclasses or use exception filters, no per-handler try/catch | Duplicate Code |
 | | Guards, interceptors and pipes for cross-cutting concerns | Shotgun Surgery |
-| | Config through `ConfigService`, never scattered `process.env` | Shotgun Surgery |
-| | Feature modules. No god `SharedModule`. `forwardRef()` cycles get flagged | Large Class, Inappropriate Intimacy |
+| | Config through `ConfigService` or the project's config module, never scattered `process.env` | Shotgun Surgery |
+| | Feature modules. Don't grow a god `SharedModule` (the scaffold's own shared module is fine). `forwardRef()` cycles get flagged | Large Class, Inappropriate Intimacy |
 | **Express** (brownfield) | Thin route handlers that call service functions | Long Method, Divergent Change |
 | | One error middleware via `next(err)`, no try/catch in every route | Duplicate Code |
 | | Shared validation middleware or schema (zod / joi / express-validator) | Duplicate Code |
 | | One config module reads `process.env` | Shotgun Surgery |
-| **Data access** (MongoDB or MSSQL) | One repository per collection or table. No DB calls in controllers or routes | Shotgun Surgery |
+| **Data access** (MongoDB or MSSQL) | Use the existing data layer. Never add or swap an ORM, ODM or driver | Consistency |
+| | One repository per collection or table. No DB calls in controllers or routes | Shotgun Surgery |
 | | Map documents and entities to response DTOs. Never return them straight from the API | Inappropriate Intimacy |
 | | Field paths, column names and statuses as shared constants, not repeated strings | Duplicate Code, Primitive Obsession |
 | | No queries inside loops. Load related data in one query (join, `populate`, `include`, `IN`) | Shotgun Surgery |
-| **MongoDB / Mongoose** | Document behavior in schema methods or a domain class | Data Class, Feature Envy |
+| **MongoDB / Mongoose** | Document logic has one home: schema methods or a domain class if the project uses them, otherwise the feature service | Data Class, Feature Envy |
 | **MSSQL** (TypeORM / Prisma / Sequelize / knex / `mssql`) | Parameterized queries only. No string-built SQL, even inside the repository | Duplicate Code, security |
 | | A multi-step write owns its transaction in one service or repository method | Shotgun Surgery |
 | | Each stored procedure gets one typed wrapper. A business rule never lives in both a proc and app code | Duplicate Code |
-| | Row behavior goes on the entity or a domain class | Data Class |
+| | Row logic has one home: the entity or a domain class if the project uses them, otherwise the service or repository | Data Class |
 
 ## Before / after
 
@@ -286,6 +287,13 @@ It won't rewrite the rest of the router, and it won't migrate it to NestJS, unle
   scripts only need to be readable.
 - **Your repo wins.** If your lint config or established conventions disagree with a rule,
   the agent follows the repo and mentions the conflict.
+- **The scaffold is the standard.** If your project was generated from an org template or
+  CLI, new code mirrors its structure, naming, and libraries, and freshly generated code
+  isn't refactored. A convention that looks like a smell is followed and mentioned once,
+  and the team decides whether to change it.
+- **No library swaps.** It uses the data layer, validation, logging, HTTP, and state
+  libraries you already have. It never replaces Mongoose or an ORM, and never adds a new
+  one to satisfy a rule.
 - **Brownfield isn't a rewrite.** New code is written cleanly, existing smells are flagged,
   and the architecture isn't touched unless you ask.
 

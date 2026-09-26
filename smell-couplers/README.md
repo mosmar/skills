@@ -96,6 +96,19 @@ repository has one case of Inappropriate Intimacy worth addressing.
 4. Fix the repository's intimate access to order.getCustomer().setAddress()
 ```
 
+## Respects your stack
+
+- **Never swaps frameworks or libraries.** Fixes use what the project already has — it won't
+  suggest replacing Mongoose or an ORM, or migrating Express to NestJS.
+- **Generated scaffold code is the clean baseline.** If your project came from an org
+  template or generator, the structure it produces isn't reported as a smell, so a fresh
+  project comes out clean and every project built from the scaffold stays consistent.
+- **Keeps the standard layers** — controller → service → repository and API services over
+  `HttpClient` aren't Middle Men.
+- **Convention notes, not findings.** If an existing convention itself looks like a smell,
+  it's mentioned separately — unrated and outside the refactoring order — so your team can
+  decide whether to change the standard.
+
 ## Part of the code smells suite
 
 Run `smell-scanner` first for a broad triage. This skill goes deep on Couplers.

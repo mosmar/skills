@@ -64,6 +64,36 @@ Scan for signals of each:
 - The same workaround for a missing library method repeated everywhere, or monkey-patching a
   third-party class you can't change (incomplete library class)
 
+## Respect the project baseline
+
+The project's frameworks, libraries, and generated scaffold are the standard you measure
+against — not the subject of the review. Teams move between projects built from the same
+scaffold, so consistency with it outweighs any individual refactoring.
+
+- **Never recommend replacing a framework or library.** Don't suggest swapping the data layer
+  (Mongoose, TypeORM, Prisma, Sequelize, knex, mssql), the web framework (Express, NestJS,
+  Angular), or the validation, logging, HTTP, state-management, or test library — and never an
+  architecture migration such as Express → NestJS. Every fix you point toward must use what the
+  project already has.
+- **Generated scaffold code is the clean baseline.** If the project was generated from an
+  organization template or CLI, the structure it produces — per-feature module / controller /
+  service / DTO / schema files, gateway wiring, standard folders, base classes, placeholder
+  files — is not a finding, even where it resembles a smell. A freshly generated project should
+  scan clean.
+- **Recognizing the baseline.** Look for conventions documented in `CLAUDE.md`,
+  `.github/copilot-instructions.md`, or a README / standards doc; patterns repeated uniformly
+  across every feature or service; and, when git history is available, files unchanged since
+  the initial generated commit. When unsure whether a pattern is convention, treat it as
+  convention and say so.
+- **Findings target what the team built on top.** Judge added code against the baseline's own
+  shape — a service that has grown well past the scaffold's pattern is a finding; the pattern
+  itself is not.
+- **Convention notes, not findings.** If a baseline convention itself looks like a smell, you
+  may mention it under *Convention notes* in the report: one or two lines on the tradeoff, no
+  severity, and no routing to a focused skill. Changing a convention — or anything that would
+  require a different library — is a standards decision for the team, because it affects
+  consistency across every project built from the same scaffold. Say so.
+
 ## How to scan
 
 Read the code — whether a snippet, file, or directory. Sweep for signals of each category.
@@ -72,6 +102,12 @@ purpose is fine. One that's 25 lines doing 5 different things is a Bloater.
 
 For directories: prioritize core logic files (services, models, controllers) over config,
 tests, and generated files. Note if you skipped anything significant.
+
+Baseline patterns don't count toward a category's rating. Common ones that are *not* smells:
+a thin controller or route that forwards to a service (not Middle Man), data-shaped schemas,
+entities, and DTOs (not Data Class), the per-feature module / controller / service / DTO /
+schema layering (not Shotgun Surgery or Parallel Hierarchies), and reducers that switch on
+`action.type` (not Switch Statements).
 
 ## Output format
 
@@ -99,14 +135,21 @@ handling validation, pricing, inventory, and notifications — four responsibili
 ---
 ### Where to dig deeper
 
-[For each category rated Moderate or Severe, recommend the focused skill and why]
+[For each category rated Moderate or Severe, recommend the focused skill and why. Never
+route for a convention alone.]
 
 - Run **smell-bloaters** on [file/dir] — [one sentence on what it will find]
 - Run **smell-dispensables** on [file/dir] — [one sentence on what it will find]
 
 ### Overall health
 [2–3 sentences. What's the dominant problem? Is this code in urgent need of refactoring
-or mostly clean with a few rough spots? What should the developer tackle first?]
+or mostly clean with a few rough spots? What should the developer tackle first? If the code
+is essentially the generated baseline, say so plainly.]
+
+### Convention notes (not findings)
+[Optional — omit if empty. Baseline conventions or library constraints that resemble a
+smell, one or two lines each on the tradeoff. Not rated and not routed — changing these is a
+team standards decision.]
 ```
 
 ## Severity guide

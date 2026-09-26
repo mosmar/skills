@@ -63,10 +63,12 @@ This is the inverse of Divergent Change: one reason to change, many classes.
 - Adding a field or capability requires touching 5+ files
 - The same concept (a field name, a constant, a validation rule) is duplicated across many files
 - Thin layer classes that each touch the same concept: Model → DTO → Mapper → Validator → Serializer
+  (beyond the layers the framework or project scaffold already prescribes)
 - Copy-pasted configuration, error handling, or transformation logic spread across many files
 - Multiple files that all import and re-export the same constant or type
 - Parallel structures where every file in a folder has the same shape (class, test, fixture, mock)
-  and adding anything means updating all of them
+  and adding anything means updating all of them — unless that shape is the scaffold's standard
+  feature layout
 
 **Named refactoring techniques:**
 - **Move Method / Move Field** — centralize the scattered logic in one place.
@@ -95,6 +97,51 @@ requires `PaymentMethodSerializer`. The hierarchies are growing in lockstep.
   first. Eliminate the second hierarchy.
 - **Use objects from one hierarchy in the other** — instead of parallel hierarchies, have one
   hierarchy hold references to objects from the other (composition over parallel inheritance).
+
+## Respect the project baseline
+
+The project's frameworks, libraries, and generated scaffold are the standard you measure
+against — not the subject of the review. Teams move between projects built from the same
+scaffold, so consistency with it outweighs any individual refactoring.
+
+- **Never recommend replacing a framework or library.** Don't suggest swapping the data layer
+  (Mongoose, TypeORM, Prisma, Sequelize, knex, mssql), the web framework (Express, NestJS,
+  Angular), or the validation, logging, HTTP, state-management, or test library — and never an
+  architecture migration such as Express → NestJS. Every refactoring you propose must use what
+  the project already has.
+- **Generated scaffold code is the clean baseline.** If the project was generated from an
+  organization template or CLI, the structure it produces — per-feature module / controller /
+  service / DTO / schema files, gateway wiring, standard folders, base classes, placeholder
+  files — is not a finding, even where it resembles a smell. A freshly generated project should
+  come out clean.
+- **Recognizing the baseline.** Look for conventions documented in `CLAUDE.md`,
+  `.github/copilot-instructions.md`, or a README / standards doc; patterns repeated uniformly
+  across every feature or service; and, when git history is available, files unchanged since
+  the initial generated commit. When unsure whether a pattern is convention, treat it as
+  convention and say so.
+- **Findings target what the team built on top.** Judge added code against the baseline's own
+  shape — a service that has grown well past the scaffold's pattern is a finding; the pattern
+  itself is not.
+- **Convention notes, not findings.** If a baseline convention itself looks like a smell, you
+  may mention it under *Convention notes* in the report: one or two lines on the tradeoff, no
+  severity or effort, and not part of the refactoring order. Changing a convention — or
+  anything that would require a different library — is a standards decision for the team,
+  because it affects consistency across every project built from the same scaffold. Say so.
+
+**Change Preventer-specific baseline calibration:**
+- **Shotgun Surgery** — the per-feature layers the framework or scaffold prescribes (schema
+  or entity, create/update DTOs, service, controller, gateway route, frontend model and API
+  service) are expected. Adding a field touching each of those is the cost of the
+  convention, not the smell. Count only the edits *beyond* what that layering requires —
+  duplicated constants, rules repeated in several services, extra hand-written mappers.
+  Never recommend collapsing layers the scaffold defines; if the layering itself looks
+  expensive, that's a convention note.
+- **Parallel Inheritance Hierarchies** — feature folders that mirror each other because the
+  scaffold generates them that way (every feature has a module, controller, service, spec)
+  are convention, not parallel hierarchies.
+- **Divergent Change** — when splitting a class, stay inside the project's existing module
+  system and folder conventions (a new provider in the feature module, a new feature
+  module), not a new architectural pattern.
 
 ## How to approach the analysis
 
@@ -142,11 +189,18 @@ This gives the reader confidence you understood the layout before diagnosing.]
 ---
 ### Hypothetical change trace
 [Pick the most illustrative example: "To add a new payment method, you would currently need
-to edit: [list the files]. After refactoring, you would edit: [list the files]."]
+to edit: [list the files]. After refactoring, you would edit: [list the files]." Separate the
+files required by the project's standard layering from the extra ones — only the extras are
+the smell.]
 
 ### Refactoring order
 [Change Preventers usually require careful sequencing. Recommend which to address first and
 warn about any dependencies between the fixes.]
+
+### Convention notes (not findings)
+[Optional — omit if empty. Baseline conventions or library constraints that resemble a
+smell, one or two lines each on the tradeoff. No severity or effort, not in the refactoring
+order — changing these is a team standards decision.]
 ```
 
 ## Tone
