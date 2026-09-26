@@ -299,6 +299,11 @@ It won't rewrite the rest of the router, and it won't migrate it to NestJS, unle
 
 ## Tuning it to your codebase
 
+- **Project baseline settings.** Add a `## Smell baseline` section to `CLAUDE.md` or
+  `.github/copilot-instructions.md` to ignore paths, declare extra conventions, or enforce a
+  convention your team decided to change. See
+  [Tuning the smell suite](../README.md#tuning-the-smell-suite). There's deliberately no
+  per-prompt switch to ignore the scaffold while writing code.
 - **Thresholds.** The numbers (3–4 params, ~4 dependencies, one hop, 5+ files) are plain
   text in `SKILL.md`. Edit them to match your team's taste.
 - **Stack rules.** The *Stack specifics* section is self-contained, so you can remove or

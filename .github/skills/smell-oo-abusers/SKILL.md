@@ -168,6 +168,25 @@ scaffold, so consistency with it outweighs any individual refactoring.
   anything that would require a different library — is a standards decision for the team,
   because it affects consistency across every project built from the same scaffold. Say so.
 
+### Controls
+
+Teams can adjust the baseline two ways. Request wording beats project settings, which beat
+the defaults above.
+
+- **Baseline audit mode.** If the user asks to "include the scaffold", "audit the template",
+  "ignore the baseline", or run a "full scan", report baseline patterns as normal findings
+  with severity and effort, prefixed `[baseline]` so readers know the fix belongs in the template or the team
+  standard, not one project. Convention notes fold into the findings. Still don't recommend
+  replacing a framework or library unless the user explicitly asks about library choice —
+  and even then, frame it as an org standards decision.
+- **Project settings.** If `CLAUDE.md` or `.github/copilot-instructions.md` has a
+  `## Smell baseline` section, honor it:
+  - `baseline: none` — behave as in audit mode for every request.
+  - `ignore:` — paths or globs you never analyze or mention.
+  - `conventions:` — extra patterns that are standard in this project; never report them.
+  - `enforce:` — conventions the team decided to change; report violations as normal
+    findings, not convention notes.
+
 **OO Abuser-specific baseline calibration:**
 - **Switch Statements** — switches the framework or state library expects are not smells:
   reducers that switch on `action.type`, error-mapping middleware and exception filters,
@@ -212,7 +231,8 @@ scaffold, so consistency with it outweighs any individual refactoring.
 Bequest and Alternative Classes are often lower effort. Temporary Field depends on severity.]
 
 ### Convention notes (not findings)
-[Optional — omit if empty. Baseline conventions or library constraints that resemble a
+[Optional — omit if empty, or in baseline audit mode where these appear above as
+`[baseline]` findings. Baseline conventions or library constraints that resemble a
 smell, one or two lines each on the tradeoff. No severity or effort, not in the refactoring
 order — changing these is a team standards decision.]
 ```

@@ -48,6 +48,13 @@ Over-engineering is a smell too.
 - **Never swap a framework or library.** Use the data layer (Mongoose, TypeORM, Prisma,
   Sequelize, knex, mssql), validation, logging, HTTP, state-management, and test libraries
   the project already has. Don't add a new one to solve a smell.
+- **Project settings.** If `CLAUDE.md` or `.github/copilot-instructions.md` has a
+  `## Smell baseline` section, honor it: never edit `ignore:` paths unless the user names
+  them; treat `conventions:` as standard; apply `enforce:` rules to new code and flag (don't
+  rewrite) existing violations. `baseline: none` means scaffold conventions stop overriding
+  the rules here when they conflict — you still don't refactor existing code unless asked,
+  and still never swap libraries. There is no per-request switch to ignore the baseline
+  while writing code; to refactor generated code, the user asks for that directly.
 - **Brownfield is not a rewrite.** In existing code (e.g. a legacy Express app), match its
   structure, write the *new* code cleanly, and flag surrounding smells per
   "When editing code that already has smells". Never migrate architecture (e.g. Express →
@@ -431,6 +438,7 @@ sketch the cleaner structure.
 - [ ] No new framework or library introduced; no existing one replaced
 - [ ] Generated or scaffold code left untouched unless the user asked
 - [ ] New code matches the project's existing structure, naming, and folder layout
+- [ ] `## Smell baseline` settings honored — `ignore` paths untouched, `enforce` rules applied to new code
 
 **Proportionality**
 - [ ] Nothing added that the task doesn't need — the simplest structure that avoids the smells above

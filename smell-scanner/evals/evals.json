@@ -53,6 +53,41 @@
           "content": "import { Test } from '@nestjs/testing';\nimport { OrdersService } from './orders.service';\n\ndescribe('OrdersService', () => {\n  it.todo('should be defined');\n});\n"
         }
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Audit the scaffold template for smells — include the scaffold, we maintain the generator.",
+      "expected_output": "Baseline audit mode: scaffold patterns are reported as normal findings prefixed [baseline] and count toward category ratings (e.g. status stored as a plain string on the schema and DTO rated at least Mild under Bloaters/Primitive Obsession). Findings should make clear the fix belongs in the template/standard. No separate Convention notes section. Must still NOT recommend replacing Mongoose, NestJS, or class-validator.",
+      "files": [
+        {
+          "path": "src/orders/orders.module.ts",
+          "content": "import { Module } from '@nestjs/common';\nimport { MongooseModule } from '@nestjs/mongoose';\nimport { OrdersController } from './orders.controller';\nimport { OrdersService } from './orders.service';\nimport { Order, OrderSchema } from './schemas/order.schema';\n\n@Module({\n  imports: [MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }])],\n  controllers: [OrdersController],\n  providers: [OrdersService],\n})\nexport class OrdersModule {}\n"
+        },
+        {
+          "path": "src/orders/orders.controller.ts",
+          "content": "import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';\nimport { OrdersService } from './orders.service';\nimport { CreateOrderDto } from './dto/create-order.dto';\nimport { UpdateOrderDto } from './dto/update-order.dto';\n\n@Controller('orders')\nexport class OrdersController {\n  constructor(private readonly ordersService: OrdersService) {}\n\n  @Post()\n  create(@Body() dto: CreateOrderDto) { return this.ordersService.create(dto); }\n\n  @Get()\n  findAll() { return this.ordersService.findAll(); }\n\n  @Get(':id')\n  findOne(@Param('id') id: string) { return this.ordersService.findOne(id); }\n\n  @Patch(':id')\n  update(@Param('id') id: string, @Body() dto: UpdateOrderDto) { return this.ordersService.update(id, dto); }\n\n  @Delete(':id')\n  remove(@Param('id') id: string) { return this.ordersService.remove(id); }\n}\n"
+        },
+        {
+          "path": "src/orders/orders.service.ts",
+          "content": "import { Injectable, NotFoundException } from '@nestjs/common';\nimport { InjectModel } from '@nestjs/mongoose';\nimport { Model } from 'mongoose';\nimport { Order, OrderDocument } from './schemas/order.schema';\nimport { CreateOrderDto } from './dto/create-order.dto';\nimport { UpdateOrderDto } from './dto/update-order.dto';\n\n@Injectable()\nexport class OrdersService {\n  constructor(@InjectModel(Order.name) private readonly orderModel: Model<OrderDocument>) {}\n\n  create(dto: CreateOrderDto) { return this.orderModel.create(dto); }\n\n  findAll() { return this.orderModel.find().lean().exec(); }\n\n  async findOne(id: string) {\n    const order = await this.orderModel.findById(id).lean().exec();\n    if (!order) throw new NotFoundException(`Order ${id} not found`);\n    return order;\n  }\n\n  async update(id: string, dto: UpdateOrderDto) {\n    const order = await this.orderModel.findByIdAndUpdate(id, dto, { new: true }).lean().exec();\n    if (!order) throw new NotFoundException(`Order ${id} not found`);\n    return order;\n  }\n\n  async remove(id: string) {\n    const order = await this.orderModel.findByIdAndDelete(id).lean().exec();\n    if (!order) throw new NotFoundException(`Order ${id} not found`);\n  }\n}\n"
+        },
+        {
+          "path": "src/orders/schemas/order.schema.ts",
+          "content": "import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';\nimport { HydratedDocument } from 'mongoose';\n\nexport type OrderDocument = HydratedDocument<Order>;\n\n@Schema({ timestamps: true })\nexport class Order {\n  @Prop({ required: true }) customerId: string;\n  @Prop({ required: true }) total: number;\n  @Prop({ required: true }) status: string;\n}\n\nexport const OrderSchema = SchemaFactory.createForClass(Order);\n"
+        },
+        {
+          "path": "src/orders/dto/create-order.dto.ts",
+          "content": "import { IsNotEmpty, IsNumber, IsString } from 'class-validator';\n\nexport class CreateOrderDto {\n  @IsString() @IsNotEmpty() customerId: string;\n  @IsNumber() total: number;\n  @IsString() status: string;\n}\n"
+        },
+        {
+          "path": "src/orders/dto/update-order.dto.ts",
+          "content": "import { PartialType } from '@nestjs/mapped-types';\nimport { CreateOrderDto } from './create-order.dto';\n\nexport class UpdateOrderDto extends PartialType(CreateOrderDto) {}\n"
+        },
+        {
+          "path": "src/orders/orders.service.spec.ts",
+          "content": "import { Test } from '@nestjs/testing';\nimport { OrdersService } from './orders.service';\n\ndescribe('OrdersService', () => {\n  it.todo('should be defined');\n});\n"
+        }
+      ]
     }
   ]
 }

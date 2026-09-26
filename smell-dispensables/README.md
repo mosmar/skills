@@ -108,6 +108,9 @@ duplicate logic is the highest-value fix — one Extract Method eliminates ~30 l
 - **Convention notes, not findings.** If an existing convention itself looks like a smell,
   it's mentioned separately — unrated and outside the refactoring order — so your team can
   decide whether to change the standard.
+- **Tunable.** Ask for a "full scan" or "audit the template" to see scaffold patterns as
+  `[baseline]` findings, or set project-wide rules with a `## Smell baseline` section — see
+  [Tuning the smell suite](../README.md#tuning-the-smell-suite).
 
 ## Part of the code smells suite
 
