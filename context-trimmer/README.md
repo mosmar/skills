@@ -105,7 +105,7 @@ cp SKILL.md .claude/skills/context-trimmer.md
 ```bash
 mkdir -p .github/skills/context-trimmer
 curl -o .github/skills/context-trimmer/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/context-trimmer/SKILL.md
+  https://raw.githubusercontent.com/mosmar/skills/main/context-trimmer/SKILL.md
 ```
 
 ## Files

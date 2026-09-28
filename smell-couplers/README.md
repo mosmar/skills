@@ -4,7 +4,7 @@ Deep-dive analysis of Coupler code smells — excessive coupling between classes
 opposite problem of classes that are useless middlemen. The unifying fix: move code to
 where it belongs.
 
-Works with **Claude Code**, **Cowork**, and **GitHub Copilot** (cloud agent).
+Works with **Claude Code**, **Cowork**, and **GitHub Copilot in VS Code** (agent mode and chat).
 
 ## The four Coupler smells
 
@@ -40,7 +40,7 @@ objects, or a class that seems to exist only to forward calls.
 - *"There are a lot of long accessor chains in this service"*
 - *"This class just delegates everything — is it even needed?"*
 
-### GitHub Copilot (VS Code agent mode / cloud agent)
+### GitHub Copilot (VS Code agent mode)
 
 Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
 
@@ -118,10 +118,27 @@ Run `smell-scanner` first for a broad triage. This skill goes deep on Couplers.
 
 ## Installing
 
+**1. Get the files.** Clone this repo, or unzip the download you were given. The commands
+below run from its root folder.
+
+```bash
+git clone https://github.com/mosmar/skills.git && cd skills
+```
+
+**2. Install for your agent.** `install.sh` copies `smell-couplers/SKILL.md` to the right place.
+
 ### Claude Code
 
 ```bash
-cp SKILL.md ~/.claude/skills/smell-couplers.md
+./install.sh --platform claude --target ~/.claude/skills smell-couplers             # every project
+./install.sh --platform claude --target <project>/.claude/skills smell-couplers     # one project
+```
+
+### GitHub Copilot
+
+```bash
+./install.sh --platform copilot-global --target ~/.copilot/skills smell-couplers    # every repo, nothing to commit
+./install.sh --target <repo> smell-couplers                                         # one repo, commit .github/skills/
 ```
 
 ### Cowork
@@ -129,12 +146,31 @@ cp SKILL.md ~/.claude/skills/smell-couplers.md
 1. Download `SKILL.md` from this folder
 2. Open Settings → Skills → Install from file
 
-### GitHub Copilot (cloud agent)
+### By hand
+
+The script only copies one file, so you can do it yourself from the repo root:
 
 ```bash
-mkdir -p .github/skills/smell-couplers
-curl -o .github/skills/smell-couplers/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/smell-couplers/SKILL.md
+# Claude Code
+cp smell-couplers/SKILL.md ~/.claude/skills/smell-couplers.md
+
+# Copilot, every repo
+mkdir -p ~/.copilot/skills/smell-couplers
+cp smell-couplers/SKILL.md ~/.copilot/skills/smell-couplers/
+
+# Copilot, one repo
+mkdir -p <repo>/.github/skills/smell-couplers
+cp smell-couplers/SKILL.md <repo>/.github/skills/smell-couplers/
+```
+
+### Without cloning
+
+Fetch the single file from GitHub (works while the repo is public). Change the `-o` path to
+any destination above:
+
+```bash
+curl --create-dirs -o ~/.copilot/skills/smell-couplers/SKILL.md \
+  https://raw.githubusercontent.com/mosmar/skills/main/smell-couplers/SKILL.md
 ```
 
 ## Files

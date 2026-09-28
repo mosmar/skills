@@ -3,7 +3,7 @@
 Deep-dive analysis of Object-Orientation Abuser smells in JavaScript and TypeScript —
 cases where OOP principles are misapplied, leaving code fragile and hard to extend.
 
-Works with **Claude Code**, **Cowork**, and **GitHub Copilot** (cloud agent).
+Works with **Claude Code**, **Cowork**, and **GitHub Copilot in VS Code** (agent mode and chat).
 
 ## The four OO Abuser smells (JS/TS focus)
 
@@ -39,7 +39,7 @@ subclass that doesn't really fit its parent.
 - *"This subclass throws Not Implemented on half its methods"*
 - *"These fields are only valid after calling init() — is that a problem?"*
 
-### GitHub Copilot (VS Code agent mode / cloud agent)
+### GitHub Copilot (VS Code agent mode)
 
 Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
 
@@ -119,10 +119,27 @@ Run `smell-scanner` first for a broad triage. This skill goes deep on OO Abusers
 
 ## Installing
 
+**1. Get the files.** Clone this repo, or unzip the download you were given. The commands
+below run from its root folder.
+
+```bash
+git clone https://github.com/mosmar/skills.git && cd skills
+```
+
+**2. Install for your agent.** `install.sh` copies `smell-oo-abusers/SKILL.md` to the right place.
+
 ### Claude Code
 
 ```bash
-cp SKILL.md ~/.claude/skills/smell-oo-abusers.md
+./install.sh --platform claude --target ~/.claude/skills smell-oo-abusers             # every project
+./install.sh --platform claude --target <project>/.claude/skills smell-oo-abusers     # one project
+```
+
+### GitHub Copilot
+
+```bash
+./install.sh --platform copilot-global --target ~/.copilot/skills smell-oo-abusers    # every repo, nothing to commit
+./install.sh --target <repo> smell-oo-abusers                                         # one repo, commit .github/skills/
 ```
 
 ### Cowork
@@ -130,12 +147,31 @@ cp SKILL.md ~/.claude/skills/smell-oo-abusers.md
 1. Download `SKILL.md` from this folder
 2. Open Settings → Skills → Install from file
 
-### GitHub Copilot (cloud agent)
+### By hand
+
+The script only copies one file, so you can do it yourself from the repo root:
 
 ```bash
-mkdir -p .github/skills/smell-oo-abusers
-curl -o .github/skills/smell-oo-abusers/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/smell-oo-abusers/SKILL.md
+# Claude Code
+cp smell-oo-abusers/SKILL.md ~/.claude/skills/smell-oo-abusers.md
+
+# Copilot, every repo
+mkdir -p ~/.copilot/skills/smell-oo-abusers
+cp smell-oo-abusers/SKILL.md ~/.copilot/skills/smell-oo-abusers/
+
+# Copilot, one repo
+mkdir -p <repo>/.github/skills/smell-oo-abusers
+cp smell-oo-abusers/SKILL.md <repo>/.github/skills/smell-oo-abusers/
+```
+
+### Without cloning
+
+Fetch the single file from GitHub (works while the repo is public). Change the `-o` path to
+any destination above:
+
+```bash
+curl --create-dirs -o ~/.copilot/skills/smell-oo-abusers/SKILL.md \
+  https://raw.githubusercontent.com/mosmar/skills/main/smell-oo-abusers/SKILL.md
 ```
 
 ## Files

@@ -67,7 +67,7 @@ cp SKILL.md .claude/skills/log-writer.md
 ```bash
 mkdir -p .github/skills/log-writer
 curl -o .github/skills/log-writer/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/log-writer/SKILL.md
+  https://raw.githubusercontent.com/mosmar/skills/main/log-writer/SKILL.md
 ```
 
 ## Output

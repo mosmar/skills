@@ -64,7 +64,7 @@ Copy `SKILL.md` into `.github/skills/tech-debt-tracker/` in your project:
 ```bash
 mkdir -p .github/skills/tech-debt-tracker
 curl -o .github/skills/tech-debt-tracker/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/tech-debt-tracker/SKILL.md
+  https://raw.githubusercontent.com/mosmar/skills/main/tech-debt-tracker/SKILL.md
 ```
 
 Copilot discovers skills in `.github/skills/` automatically and picks this one based on your prompt

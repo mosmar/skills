@@ -81,7 +81,7 @@ cp SKILL.md .claude/skills/prompt-sharpener.md
 ```bash
 mkdir -p .github/skills/prompt-sharpener
 curl -o .github/skills/prompt-sharpener/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/prompt-sharpener/SKILL.md
+  https://raw.githubusercontent.com/mosmar/skills/main/prompt-sharpener/SKILL.md
 ```
 
 ## Files

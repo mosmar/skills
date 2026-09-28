@@ -4,7 +4,7 @@ Deep-dive analysis of Bloater code smells — things that have grown too large t
 comfortably. Finds every instance, names the specific refactoring technique, and gives
 concrete before/after guidance.
 
-Works with **Claude Code**, **Cowork**, and **GitHub Copilot** (cloud agent).
+Works with **Claude Code**, **Cowork**, and **GitHub Copilot in VS Code** (agent mode and chat).
 
 ## The five Bloater smells
 
@@ -34,7 +34,7 @@ a function signature that's out of control.
 - *"This function is way too long, help me break it down"*
 - *"Too many parameters in this service — what's the fix?"*
 
-### GitHub Copilot (VS Code agent mode / cloud agent)
+### GitHub Copilot (VS Code agent mode)
 
 Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
 
@@ -109,10 +109,27 @@ The other focused skills cover the remaining four categories.
 
 ## Installing
 
+**1. Get the files.** Clone this repo, or unzip the download you were given. The commands
+below run from its root folder.
+
+```bash
+git clone https://github.com/mosmar/skills.git && cd skills
+```
+
+**2. Install for your agent.** `install.sh` copies `smell-bloaters/SKILL.md` to the right place.
+
 ### Claude Code
 
 ```bash
-cp SKILL.md ~/.claude/skills/smell-bloaters.md
+./install.sh --platform claude --target ~/.claude/skills smell-bloaters             # every project
+./install.sh --platform claude --target <project>/.claude/skills smell-bloaters     # one project
+```
+
+### GitHub Copilot
+
+```bash
+./install.sh --platform copilot-global --target ~/.copilot/skills smell-bloaters    # every repo, nothing to commit
+./install.sh --target <repo> smell-bloaters                                         # one repo, commit .github/skills/
 ```
 
 ### Cowork
@@ -120,12 +137,31 @@ cp SKILL.md ~/.claude/skills/smell-bloaters.md
 1. Download `SKILL.md` from this folder
 2. Open Settings → Skills → Install from file
 
-### GitHub Copilot (cloud agent)
+### By hand
+
+The script only copies one file, so you can do it yourself from the repo root:
 
 ```bash
-mkdir -p .github/skills/smell-bloaters
-curl -o .github/skills/smell-bloaters/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/smell-bloaters/SKILL.md
+# Claude Code
+cp smell-bloaters/SKILL.md ~/.claude/skills/smell-bloaters.md
+
+# Copilot, every repo
+mkdir -p ~/.copilot/skills/smell-bloaters
+cp smell-bloaters/SKILL.md ~/.copilot/skills/smell-bloaters/
+
+# Copilot, one repo
+mkdir -p <repo>/.github/skills/smell-bloaters
+cp smell-bloaters/SKILL.md <repo>/.github/skills/smell-bloaters/
+```
+
+### Without cloning
+
+Fetch the single file from GitHub (works while the repo is public). Change the `-o` path to
+any destination above:
+
+```bash
+curl --create-dirs -o ~/.copilot/skills/smell-bloaters/SKILL.md \
+  https://raw.githubusercontent.com/mosmar/skills/main/smell-bloaters/SKILL.md
 ```
 
 ## Files

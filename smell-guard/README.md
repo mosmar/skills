@@ -12,29 +12,31 @@ It covers all five [refactoring.guru](https://refactoring.guru/refactoring/smell
 categories, plus stack-specific rules for **Angular**, **NestJS**, **Express**,
 **MongoDB/Mongoose** and **MSSQL (SQL Server)**.
 
-Works with **Claude Code**, **Cowork**, **GitHub Copilot in VS Code** (agent mode and chat), and
-**GitHub Copilot** (cloud agent).
+Works with **Claude Code**, **Cowork**, and **GitHub Copilot in VS Code** (agent mode and chat).
 
 ## Quick start
 
-**GitHub Copilot, for one repo.** Commit the skill to the repo:
+**1. Get the files.** Clone this repo, or unzip the download you were given. The commands
+below run from its root folder.
 
 ```bash
-mkdir -p .github/skills/smell-guard
-curl -o .github/skills/smell-guard/SKILL.md \
-  https://raw.githubusercontent.com/<your-username>/skills/main/smell-guard/SKILL.md
+git clone https://github.com/mosmar/skills.git && cd skills
 ```
 
-**Claude Code, for one project or all projects:**
+**2. Install for your agent.**
 
 ```bash
-# from a clone of this repo
-./install.sh --platform claude --target .claude/skills smell-guard      # this project
-./install.sh --platform claude --target ~/.claude/skills smell-guard    # every project
+# GitHub Copilot
+./install.sh --platform copilot-global --target ~/.copilot/skills smell-guard   # every repo, nothing to commit
+./install.sh --target <repo> smell-guard                                        # one repo, commit .github/skills/
+
+# Claude Code
+./install.sh --platform claude --target ~/.claude/skills smell-guard            # every project
+./install.sh --platform claude --target <project>/.claude/skills smell-guard    # one project
 ```
 
-For more options, see [Install reference](#install-reference), including always-on Copilot
-instructions that apply only to TS/HTML/CSS files.
+For more options, see [Install reference](#install-reference), including a manual install,
+always-on Copilot instructions, and instructions that apply only to TS/HTML/CSS files.
 
 ## How to trigger it
 
@@ -48,7 +50,7 @@ it's installed, the agent picks it up on ordinary coding requests.
 - *"Refactor this service so it's easier to test"*
 - *"Write this following smell-guard"* (to invoke it explicitly)
 
-### GitHub Copilot (VS Code agent mode / cloud agent)
+### GitHub Copilot (VS Code agent mode)
 
 - *"Add a PATCH /orders/:id/cancel route to #file:src/routes/orders.js"*
 - *"Create a NestJS OrdersModule with create and list endpoints"*
@@ -352,24 +354,40 @@ reviews, and the focused skills to clean up anything that slipped through.
 
 ## Install reference
 
+Every command here runs from the root of your clone or unzipped copy of this repo (see
+[Quick start](#quick-start)). `install.sh` only copies `smell-guard/SKILL.md`, so the
+manual commands do the same thing.
+
 ### Claude Code
 
 ```bash
-# Project-specific
-mkdir -p .claude/skills
-cp SKILL.md .claude/skills/smell-guard.md
-
 # Global — all projects
-cp SKILL.md ~/.claude/skills/smell-guard.md
+cp smell-guard/SKILL.md ~/.claude/skills/smell-guard.md
+
+# One project
+mkdir -p <project>/.claude/skills
+cp smell-guard/SKILL.md <project>/.claude/skills/smell-guard.md
 ```
 
-Or use `./install.sh --platform claude --target <dir> smell-guard` from the repo root.
+Or use `./install.sh --platform claude --target <dir> smell-guard`.
 
-### GitHub Copilot: skill (VS Code agent mode and cloud agent)
+### GitHub Copilot: personal skill (all repos)
+
+Copilot also reads skills from a personal, global directory, so this isn't tied to one
+repo and there's nothing to commit:
 
 ```bash
-mkdir -p .github/skills/smell-guard
-cp SKILL.md .github/skills/smell-guard/SKILL.md
+mkdir -p ~/.copilot/skills/smell-guard
+cp smell-guard/SKILL.md ~/.copilot/skills/smell-guard/SKILL.md
+```
+
+Or use `./install.sh --platform copilot-global --target ~/.copilot/skills smell-guard`.
+
+### GitHub Copilot: repo skill (one repo)
+
+```bash
+mkdir -p <repo>/.github/skills/smell-guard
+cp smell-guard/SKILL.md <repo>/.github/skills/smell-guard/SKILL.md
 ```
 
 Or use `./install.sh --target <repo> smell-guard`. Copilot selects the skill from its
@@ -382,7 +400,8 @@ the skill gets selected, add them to `.github/copilot-instructions.md`. Strip th
 frontmatter first, because it's only for skill discovery:
 
 ```bash
-awk '/^---$/ && n<2 {n++; next} n>=2' SKILL.md >> .github/copilot-instructions.md
+mkdir -p <repo>/.github
+awk '/^---$/ && n<2 {n++; next} n>=2' smell-guard/SKILL.md >> <repo>/.github/copilot-instructions.md
 ```
 
 ### GitHub Copilot: scoped to Angular / TypeScript files
@@ -391,11 +410,21 @@ To apply the rules only to TS, HTML and CSS/SCSS files, create a path-scoped ins
 file:
 
 ```bash
-mkdir -p .github/instructions
+mkdir -p <repo>/.github/instructions
 {
   printf -- '---\napplyTo: "**/*.ts,**/*.html,**/*.css,**/*.scss"\n---\n\n'
-  awk '/^---$/ && n<2 {n++; next} n>=2' SKILL.md
-} > .github/instructions/smell-guard.instructions.md
+  awk '/^---$/ && n<2 {n++; next} n>=2' smell-guard/SKILL.md
+} > <repo>/.github/instructions/smell-guard.instructions.md
+```
+
+### Without cloning
+
+Fetch the single file from GitHub (works while the repo is public). Change the `-o` path to
+any destination above:
+
+```bash
+curl --create-dirs -o ~/.copilot/skills/smell-guard/SKILL.md \
+  https://raw.githubusercontent.com/mosmar/skills/main/smell-guard/SKILL.md
 ```
 
 ### Cowork

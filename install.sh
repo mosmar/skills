@@ -14,7 +14,7 @@ Install skills into a target directory for GitHub Copilot or Claude Code.
 
 OPTIONS
   -t, --target DIR    Destination directory (default: current working directory)
-  -p, --platform STR  copilot (default) or claude
+  -p, --platform STR  copilot (default), copilot-global, or claude
       --suite NAME    Install every skill in a suite (see suites.txt), e.g. smell
       --no-deps       Don't auto-install a suite when its entry-point skill is named
   -l, --list          List available skills and suites, then exit
@@ -42,12 +42,19 @@ EXAMPLES
   # Install all skills for Claude Code (global)
   ./install.sh --platform claude --target ~/.claude/skills
 
+  # Install all skills as personal Copilot skills, available in every repo
+  ./install.sh --platform copilot-global --target ~/.copilot/skills
+
 GITHUB COPILOT — where to point --target
   Project-level  : the root of any git repository
                    skills land in  <repo>/.github/skills/<name>/SKILL.md
   User profile   : the root of your personal profile repository
                    (github.com/<username>/<username> or a dedicated skills repo)
                    skills land in  <repo>/.github/skills/<name>/SKILL.md
+
+GITHUB COPILOT — PERSONAL (GLOBAL), use --platform copilot-global
+  Global         : ~/.copilot/skills        (available in every repo, nothing to commit)
+  skills land in  <dir>/<name>/SKILL.md
 
 CLAUDE CODE — where to point --target
   Global         : ~/.claude/skills          (available in every project)
@@ -108,7 +115,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ "$PLATFORM" =~ ^(copilot|claude)$ ]] || die "Platform must be 'copilot' or 'claude'"
+[[ "$PLATFORM" =~ ^(copilot|copilot-global|claude)$ ]] || die "Platform must be 'copilot', 'copilot-global', or 'claude'"
 
 # ── resolve skill list ────────────────────────────────────────────────────────
 
@@ -171,6 +178,9 @@ for skill in "${SKILLS[@]}"; do
   if [[ "$PLATFORM" == "copilot" ]]; then
     dest_dir="$TARGET/.github/skills/$skill"
     dest="$dest_dir/SKILL.md"
+  elif [[ "$PLATFORM" == "copilot-global" ]]; then
+    dest_dir="$TARGET/$skill"
+    dest="$dest_dir/SKILL.md"
   else
     dest_dir="$TARGET"
     dest="$dest_dir/$skill.md"
@@ -201,4 +211,9 @@ if [[ "$PLATFORM" == "copilot" ]]; then
   echo "  1. Commit and push the .github/skills/ directory to GitHub"
   echo "  2. Copilot will discover the skills automatically — no restart needed"
   echo "  3. Trigger a skill by describing what you want in a Copilot chat"
+elif [[ "$PLATFORM" == "copilot-global" ]]; then
+  echo ""
+  echo "Next steps:"
+  echo "  1. Nothing to commit — these skills are now available in every repo"
+  echo "  2. Trigger a skill by describing what you want in a Copilot chat"
 fi

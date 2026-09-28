@@ -3,7 +3,7 @@
 The entry point for the code smells suite. Does a fast triage pass across all five smell
 categories and tells you which focused skill to run next.
 
-Works with **Claude Code**, **Cowork**, and **GitHub Copilot** (cloud agent).
+Works with **Claude Code**, **Cowork**, and **GitHub Copilot in VS Code** (agent mode and chat).
 
 ## When to use it
 
@@ -26,7 +26,7 @@ the focused skill.
 
 Works with pasted snippets, single files, or a whole directory.
 
-### GitHub Copilot (VS Code agent mode / cloud agent)
+### GitHub Copilot (VS Code agent mode)
 
 Copilot picks the skill automatically from its `description`, so natural phrasing works. You can also name the skill to invoke it explicitly.
 
@@ -106,30 +106,39 @@ This skill is part of a five-skill deep-dive suite:
 
 ## Installing
 
-The scanner recommends running its five sibling skills, so install them together. Naming
-`smell-scanner` (or using `--suite smell`) installs the whole suite from the repo root:
+The scanner recommends running its five sibling skills, so install them together.
+
+**1. Get the files.** Clone this repo, or unzip the download you were given. The commands
+below run from its root folder.
 
 ```bash
-# Claude Code — global
-./install.sh --platform claude --target ~/.claude/skills --suite smell
+git clone https://github.com/mosmar/skills.git && cd skills
+```
 
-# Claude Code — project-specific
-./install.sh --platform claude --target .claude/skills --suite smell
+**2. Install the suite for your agent.** Naming `smell-scanner` or using `--suite smell`
+installs all six skills:
 
-# GitHub Copilot — into the current project's .github/skills/
-./install.sh --suite smell
+```bash
+# GitHub Copilot
+./install.sh --platform copilot-global --target ~/.copilot/skills --suite smell   # every repo, nothing to commit
+./install.sh --target <repo> --suite smell                                        # one repo, commit .github/skills/
+
+# Claude Code
+./install.sh --platform claude --target ~/.claude/skills --suite smell            # every project
+./install.sh --platform claude --target <project>/.claude/skills --suite smell    # one project
 ```
 
 Use `--no-deps` to install `smell-scanner` on its own.
 
-### Manual install (single skill)
+### Manual install
 
-Copy each of the six `SKILL.md` files — the scanner alone will point you at skills you
-don't have.
+Copy all six skill files from the repo root. The scanner alone will point you at skills
+you don't have.
 
 - **Claude Code:** `cp <skill>/SKILL.md ~/.claude/skills/<skill>.md`
+- **Copilot, every repo:** copy each to `~/.copilot/skills/<skill>/SKILL.md`
+- **Copilot, one repo:** copy each to `<repo>/.github/skills/<skill>/SKILL.md`
 - **Cowork:** Settings → Skills → Install from file, once per skill
-- **Copilot:** place each at `.github/skills/<skill>/SKILL.md`
 
 ## Files
 
