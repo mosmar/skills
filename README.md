@@ -16,52 +16,65 @@ Each skill is a self-contained `SKILL.md` file that works with **Claude Code**, 
 | [smell-oo-abusers](./smell-oo-abusers/) | Deep analysis of OO Abuser smells in JS/TS — Switch Statements, Temporary Field, Refused Bequest, Alternative Classes |
 | [smell-change-preventers](./smell-change-preventers/) | Deep analysis of Change Preventer smells — Divergent Change, Shotgun Surgery, Parallel Inheritance Hierarchies |
 
-## How to install a skill
+## How to install
 
-### Claude Code
-Copy `SKILL.md` to a skills directory Claude Code watches:
+Clone this repo and run the installer from its root:
 
 ```bash
-# Global — available in every project
-cp skill-name/SKILL.md ~/.claude/skills/skill-name.md
-
-# Project-specific — only in that project
-mkdir -p .claude/skills
-cp skill-name/SKILL.md .claude/skills/skill-name.md
+./install.sh
 ```
 
-Claude Code discovers skills in both locations automatically. Trigger by describing what you want — see each skill's README for example phrases.
+It asks three questions:
+
+1. **What to install**
+   - **All skills (recommended)**: the scanner group and the guard together
+   - **Scanner**: smell-scanner plus its five deep-dive skills, for analyzing existing code
+   - **Guard**: smell-guard, the coding standard that stops smells being written
+   - **Individual skills**: pick from a list
+2. **Which agent**: Claude Code or GitHub Copilot
+3. **Where**: global, or a project you name
+
+| | Global: every project on this machine, nothing to commit | Project: one repo, commit it to share with your team |
+|---|---|---|
+| **Claude Code** | `~/.claude/skills/<name>/SKILL.md` | `<project>/.claude/skills/<name>/SKILL.md` |
+| **GitHub Copilot** | `~/.copilot/skills/<name>/SKILL.md` | `<project>/.github/skills/<name>/SKILL.md` |
+
+Both agents discover skills in these locations automatically. They pick the right one from your
+prompt and the skill's `description`. See each skill's README for example phrases, and the
+[GitHub docs](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills)
+for more on Copilot skills.
+
+### Flags
+
+Skip the menu by passing the same choices as flags:
+
+```bash
+./install.sh --claude  --global all                        # recommended
+./install.sh --copilot --global scanner
+./install.sh --copilot --project --dir ~/code/app guard     # project: pass its path with --dir
+./install.sh --claude  --project --dir ~/code/app all
+./install.sh --claude  --global smell-bloaters smell-couplers
+
+./install.sh --list    # skills and groups
+./install.sh --help
+```
+
+Groups are defined in [suites.txt](./suites.txt).
+
+### By hand
+
+Each skill is one file. Copy it into `<skills dir>/<name>/SKILL.md`, using the table above:
+
+```bash
+mkdir -p ~/.claude/skills/smell-scanner
+cp smell-scanner/SKILL.md ~/.claude/skills/smell-scanner/
+```
 
 ### Cowork
+
 1. Download `SKILL.md` from the skill's folder
 2. Open Settings → Skills → Install from file
 3. Trigger it by describing what you want
-
-### GitHub Copilot
-Copy the `SKILL.md` into `.github/skills/<skill-name>/` in your project:
-
-```bash
-mkdir -p .github/skills/smell-scanner
-curl -o .github/skills/smell-scanner/SKILL.md \
-  https://raw.githubusercontent.com/mosmar/skills/main/smell-scanner/SKILL.md
-```
-
-Copilot automatically discovers skills in `.github/skills/` and selects the right one based on your prompt and the skill's `description`. See the [GitHub docs](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills) for details.
-
-Copilot also reads skills from a personal, global directory at `~/.copilot/skills/<skill-name>/SKILL.md`, available in every repo with nothing to commit — use `./install.sh --platform copilot-global --target ~/.copilot/skills <skill-name>`.
-
-### Installing a suite
-
-Skills that work together are listed in [suites.txt](./suites.txt). Install one in a single step:
-
-```bash
-# smell-scanner + its five deep-dive skills, from the root of this repo
-./install.sh --platform copilot-global --target ~/.copilot/skills --suite smell   # Copilot, every repo
-./install.sh --target <repo> --suite smell                                        # Copilot, one repo
-./install.sh --platform claude --target ~/.claude/skills --suite smell            # Claude Code, every project
-
-./install.sh --list   # show available skills and suites
-```
 
 ## Tuning the smell suite
 

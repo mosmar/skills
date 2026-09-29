@@ -55,8 +55,8 @@ Markdown instructions for the agent…
 
 | Scope | Path | Notes |
 |---|---|---|
-| Global (all projects) | `~/.claude/skills/<name>.md` | Available everywhere |
-| Project-specific | `.claude/skills/<name>.md` | Only in that project |
+| Global (all projects) | `~/.claude/skills/<name>/SKILL.md` | Available everywhere |
+| Project-specific | `.claude/skills/<name>/SKILL.md` | Only in that project |
 
 Both paths are auto-discovered by Claude Code; no restart required.
 

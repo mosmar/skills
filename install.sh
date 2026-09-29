@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — install skills from this repo into a Copilot or Claude Code target directory
+# install.sh — install skills from this repo for Claude Code or GitHub Copilot, globally or per project
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,58 +8,40 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
   cat <<EOF
-Usage: install.sh [OPTIONS] [SKILL...]
+Usage: install.sh [PLATFORM] [SCOPE] [WHAT...]
 
-Install skills into a target directory for GitHub Copilot or Claude Code.
+Run with no arguments for an interactive menu.
 
-OPTIONS
-  -t, --target DIR    Destination directory (default: current working directory)
-  -p, --platform STR  copilot (default), copilot-global, or claude
-      --suite NAME    Install every skill in a suite (see suites.txt), e.g. smell
-      --no-deps       Don't auto-install a suite when its entry-point skill is named
-  -l, --list          List available skills and suites, then exit
+PLATFORM
+      --claude        Claude Code
+      --copilot       GitHub Copilot
+
+SCOPE
+      --global        Every project on this machine, nothing to commit
+      --project       One project: the current directory, or --dir DIR
+      --dir DIR       Project directory to install into (implies --project)
+
+WHAT (default: all)
+  all                 Every skill in this repo (recommended)
+  scanner             smell-scanner plus its five deep-dive skills
+  guard               smell-guard, the coding standard that prevents smells
+  <skill>...          One or more individual skills, e.g. smell-bloaters
+
+OTHER
+  -l, --list          List available skills, then exit
   -h, --help          Show this help
 
-SKILLS
-  Space-separated skill names to install. Omit to install all available skills.
+WHERE SKILLS LAND  (each skill in <dir>/<name>/SKILL.md)
+                --global              --project
+  --claude      ~/.claude/skills      <project>/.claude/skills
+  --copilot     ~/.copilot/skills     <project>/.github/skills
 
 EXAMPLES
-  # Install all skills into the current project (Copilot)
-  ./install.sh
-
-  # Install all skills into your GitHub profile repo
-  ./install.sh --target ~/code/your-username
-
-  # Install a whole suite (smell-scanner plus its five deep-dive skills)
-  ./install.sh --suite smell
-
-  # Install a specific skill
-  ./install.sh smell-scanner
-
-  # Install multiple skills into a given directory
-  ./install.sh --target ~/code/myproject smell-bloaters smell-couplers
-
-  # Install all skills for Claude Code (global)
-  ./install.sh --platform claude --target ~/.claude/skills
-
-  # Install all skills as personal Copilot skills, available in every repo
-  ./install.sh --platform copilot-global --target ~/.copilot/skills
-
-GITHUB COPILOT — where to point --target
-  Project-level  : the root of any git repository
-                   skills land in  <repo>/.github/skills/<name>/SKILL.md
-  User profile   : the root of your personal profile repository
-                   (github.com/<username>/<username> or a dedicated skills repo)
-                   skills land in  <repo>/.github/skills/<name>/SKILL.md
-
-GITHUB COPILOT — PERSONAL (GLOBAL), use --platform copilot-global
-  Global         : ~/.copilot/skills        (available in every repo, nothing to commit)
-  skills land in  <dir>/<name>/SKILL.md
-
-CLAUDE CODE — where to point --target
-  Global         : ~/.claude/skills          (available in every project)
-  Project-local  : <project>/.claude/skills  (available in that project only)
-  skills land in  <dir>/<name>.md
+  ./install.sh                                          # interactive menu
+  ./install.sh --claude --global all                    # everything, Claude Code, every project
+  ./install.sh --copilot --project scanner              # scanner suite into this repo
+  ./install.sh --copilot --project --dir ~/code/app guard
+  ./install.sh --claude --global smell-bloaters smell-couplers
 EOF
 }
 
@@ -86,104 +68,240 @@ list_suites() {
   grep -E '^[A-Za-z0-9_-]+:' "$REPO_DIR/suites.txt" 2>/dev/null | cut -d: -f1
 }
 
+contains() {
+  local needle="$1"; shift
+  for e in "$@"; do [[ "$e" == "$needle" ]] && return 0; done
+  return 1
+}
+
+# Where skills land. Usage: root_dir PLATFORM SCOPE [PROJECT_DIR]
+root_dir() {
+  local project="${3:-$PROJECT_DIR}"
+  case "$1:$2" in
+    claude:global)   echo "$HOME/.claude/skills" ;;
+    claude:project)  echo "$project/.claude/skills" ;;
+    copilot:global)  echo "$HOME/.copilot/skills" ;;
+    copilot:project) echo "$project/.github/skills" ;;
+  esac
+}
+
+tilde() { echo "${1/#$HOME/~}"; }
+
+# Numbered menu; sets CHOICE to the picked number. Usage: choose PROMPT DEFAULT OPTION...
+choose() {
+  local prompt="$1" default="$2" reply i=1
+  shift 2
+  echo ""
+  echo "$prompt"
+  for opt in "$@"; do echo "  $i) $opt"; i=$((i + 1)); done
+  while true; do
+    read -r -p "  Choice${default:+ [$default]}: " reply || die "No input"
+    reply="${reply:-$default}"
+    if [[ "$reply" =~ ^[0-9]+$ ]] && (( reply >= 1 && reply <= $# )); then
+      CHOICE="$reply"
+      return
+    fi
+    warn "Enter a number from 1 to $#"
+  done
+}
+
+ask_project_dir() {
+  local default="" reply
+  [[ "$PROJECT_DIR" != "$REPO_DIR" ]] && default="$PROJECT_DIR"
+  echo ""
+  while true; do
+    read -r -p "Project directory${default:+ [$(tilde "$default")]}: " reply || die "No input"
+    reply="${reply:-$default}"
+    reply="${reply/#\~/$HOME}"
+    if [[ -n "$reply" && -d "$reply" ]]; then
+      PROJECT_DIR="$reply"
+      return
+    fi
+    warn "Enter the path to an existing directory"
+  done
+}
+
+pick_individual() {
+  local reply n bad i=1
+  echo ""
+  echo "Which skills? (space-separated numbers)"
+  for s in "${AVAILABLE[@]}"; do echo "  $i) $s"; i=$((i + 1)); done
+  while true; do
+    read -r -p "  Choice: " reply || die "No input"
+    SELECTED=()
+    bad=0
+    for n in $reply; do
+      if [[ "$n" =~ ^[0-9]+$ ]] && (( n >= 1 && n <= ${#AVAILABLE[@]} )); then
+        SELECTED+=("${AVAILABLE[n - 1]}")
+      else
+        bad=1
+      fi
+    done
+    [[ $bad -eq 0 && ${#SELECTED[@]} -gt 0 ]] && return
+    warn "Enter one or more numbers from 1 to ${#AVAILABLE[@]}"
+  done
+}
+
 # ── argument parsing ──────────────────────────────────────────────────────────
 
-TARGET="$(pwd)"
-PLATFORM="copilot"
+PLATFORM=""
+SCOPE=""
+PROJECT_DIR="$(pwd)"
+DIR_SET=0
 SELECTED=()
-NO_DEPS=0
+NO_ARGS=0; [[ $# -eq 0 ]] && NO_ARGS=1
+
+AVAILABLE=()
+while IFS= read -r s; do AVAILABLE+=("$s"); done < <(list_skills)
+[[ ${#AVAILABLE[@]} -gt 0 ]] || die "No skills found in $REPO_DIR"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -t|--target)   TARGET="$2"; shift 2 ;;
-    -p|--platform) PLATFORM="$2"; shift 2 ;;
-    --suite)
-      [[ $# -ge 2 ]] || die "--suite needs a name"
-      members="$(suite_skills "$2")"
-      [[ -n "$members" ]] || die "Unknown suite '$2'. Run --list to see available suites."
-      for m in $members; do SELECTED+=("$m"); done
-      shift 2 ;;
-    --no-deps)     NO_DEPS=1; shift ;;
+    --claude)  PLATFORM="claude"; shift ;;
+    --copilot) PLATFORM="copilot"; shift ;;
+    --global)  SCOPE="global"; shift ;;
+    --project) SCOPE="project"; shift ;;
+    --dir)
+      [[ $# -ge 2 ]] || die "--dir needs a directory"
+      PROJECT_DIR="$2"; DIR_SET=1; shift 2 ;;
+    -p|--platform|-t|--target|--suite|--no-deps)
+      die "$1 was replaced. Use --claude/--copilot, --global/--project [--dir DIR], and all|scanner|guard|<skill>. See --help." ;;
     -l|--list)
-      echo "Available skills:"; list_skills | sed 's/^/  /'
-      echo ""; echo "Available suites (--suite NAME):"
+      echo "Skills:"; printf '  %s\n' "${AVAILABLE[@]}"
+      echo ""; echo "Groups:"
+      echo "  all: ${AVAILABLE[*]}"
       for s in $(list_suites); do echo "  $s: $(suite_skills "$s")"; done
       exit 0 ;;
-    -h|--help)     usage; exit 0 ;;
+    -h|--help) usage; exit 0 ;;
     -*) die "Unknown option: $1" ;;
     *)  SELECTED+=("$1"); shift ;;
   esac
 done
 
-[[ "$PLATFORM" =~ ^(copilot|copilot-global|claude)$ ]] || die "Platform must be 'copilot', 'copilot-global', or 'claude'"
+if [[ $DIR_SET -eq 1 ]]; then
+  [[ "$SCOPE" != "global" ]] || die "--dir only applies to --project"
+  SCOPE="project"
+fi
+
+# ── fill in missing choices ───────────────────────────────────────────────────
+
+MENU_USED=0
+
+if [[ ${#SELECTED[@]} -eq 0 ]]; then
+  if [[ $NO_ARGS -eq 1 && -t 0 ]]; then
+    MENU_USED=1
+    choose "What do you want to install?" 1 \
+      "All skills (recommended)" \
+      "Scanner — smell-scanner plus its five deep-dive skills" \
+      "Guard — smell-guard, the coding standard that prevents smells" \
+      "Pick individual skills"
+    case "$CHOICE" in
+      1) SELECTED=(all) ;;
+      2) SELECTED=(scanner) ;;
+      3) SELECTED=(guard) ;;
+      4) pick_individual ;;
+    esac
+  else
+    SELECTED=(all)
+  fi
+fi
+
+if [[ -z "$PLATFORM" ]]; then
+  [[ -t 0 ]] || die "Choose a platform: --claude or --copilot. See --help."
+  MENU_USED=1
+  choose "Which agent?" "" "Claude Code" "GitHub Copilot"
+  case "$CHOICE" in 1) PLATFORM="claude" ;; 2) PLATFORM="copilot" ;; esac
+fi
+
+ASK_DIR=0
+if [[ -z "$SCOPE" ]]; then
+  [[ -t 0 ]] || die "Choose a scope: --global or --project. See --help."
+  MENU_USED=1
+  choose "Install where?" 1 \
+    "Global — every project on this machine, nothing to commit  ($(tilde "$(root_dir "$PLATFORM" global)"))" \
+    "A project — commit it to share with your team  ($(root_dir "$PLATFORM" project "<project>"))"
+  case "$CHOICE" in 1) SCOPE="global" ;; 2) SCOPE="project"; ASK_DIR=1 ;; esac
+fi
+
+# Running from this repo's root is the documented way to install, so "current directory" means
+# this repo — ask for the real project instead
+if [[ "$SCOPE" == "project" && $DIR_SET -eq 0 && "$PROJECT_DIR" == "$REPO_DIR" ]]; then
+  [[ -t 0 ]] || die "--project installs into the current directory, which is this skills repo. Add --dir <project>."
+  ASK_DIR=1
+fi
+if [[ $ASK_DIR -eq 1 && $DIR_SET -eq 0 ]]; then
+  MENU_USED=1
+  ask_project_dir
+fi
+
+if [[ "$SCOPE" == "project" ]]; then
+  [[ -d "$PROJECT_DIR" ]] || die "Project directory not found: $PROJECT_DIR"
+  PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
+fi
+
+ROOT="$(root_dir "$PLATFORM" "$SCOPE")"
 
 # ── resolve skill list ────────────────────────────────────────────────────────
 
-AVAILABLE=()
-while IFS= read -r s; do AVAILABLE+=("$s"); done < <(list_skills)
-
-[[ ${#AVAILABLE[@]} -gt 0 ]] || die "No skills found in $REPO_DIR"
-
-if [[ ${#SELECTED[@]} -eq 0 ]]; then
-  SKILLS=("${AVAILABLE[@]}")
-else
-  SKILLS=()
-  for s in "${SELECTED[@]}"; do
-    found=0
-    for a in "${AVAILABLE[@]}"; do
-      [[ "$a" == "$s" ]] && { found=1; break; }
-    done
-    [[ $found -eq 1 ]] || die "Unknown skill '$s'. Run --list to see available skills."
+SKILLS=()
+for s in "${SELECTED[@]}"; do
+  if [[ "$s" == "all" ]]; then
+    SKILLS+=("${AVAILABLE[@]}")
+  elif members="$(suite_skills "$s")" && [[ -n "$members" ]]; then
+    for m in $members; do SKILLS+=("$m"); done
+  else
+    contains "$s" "${AVAILABLE[@]}" || die "Unknown skill '$s'. Run --list to see available skills."
     SKILLS+=("$s")
-  done
-
-  # Naming a suite's entry-point skill pulls in the rest of the suite
-  if [[ $NO_DEPS -eq 0 ]]; then
-    for suite in $(list_suites); do
-      members="$(suite_skills "$suite")"
-      entry="${members%% *}"
-      for s in "${SKILLS[@]}"; do
-        if [[ "$s" == "$entry" ]]; then
-          for m in $members; do SKILLS+=("$m"); done
-          break
-        fi
-      done
-    done
   fi
+done
 
-  # De-duplicate, preserving order
-  DEDUPED=()
-  for s in "${SKILLS[@]}"; do
-    dup=0
-    for d in ${DEDUPED[@]+"${DEDUPED[@]}"}; do
-      [[ "$d" == "$s" ]] && { dup=1; break; }
-    done
-    [[ $dup -eq 1 ]] || DEDUPED+=("$s")
+# De-duplicate, preserving order
+DEDUPED=()
+for s in "${SKILLS[@]}"; do
+  contains "$s" ${DEDUPED[@]+"${DEDUPED[@]}"} || DEDUPED+=("$s")
+done
+SKILLS=("${DEDUPED[@]}")
+
+# A suite's entry-point skill hands off to the rest of the suite; flag it when they're missing
+for suite in $(list_suites); do
+  members="$(suite_skills "$suite")"
+  entry="${members%% *}"
+  contains "$entry" "${SKILLS[@]}" || continue
+  for m in $members; do
+    if ! contains "$m" "${SKILLS[@]}"; then
+      warn "$entry hands off to the rest of the '$suite' group. Install '$suite' to get them all."
+      break
+    fi
   done
-  SKILLS=("${DEDUPED[@]}")
-fi
+done
 
 # ── install ───────────────────────────────────────────────────────────────────
 
+case "$PLATFORM" in claude) platform_name="Claude Code" ;; copilot) platform_name="GitHub Copilot" ;; esac
+case "$SCOPE" in global) scope_name="global (every project)" ;; project) scope_name="project ($(tilde "$PROJECT_DIR"))" ;; esac
+
 echo ""
-echo "Platform : $PLATFORM"
-echo "Target   : $TARGET"
+echo "Platform : $platform_name"
+echo "Scope    : $scope_name"
+echo "Target   : $(tilde "$ROOT")"
 echo "Skills   : ${SKILLS[*]}"
 echo ""
+
+if [[ $MENU_USED -eq 1 ]]; then
+  read -r -p "Proceed? [Y/n] " reply || die "No input"
+  [[ "$reply" =~ ^[Nn] ]] && { echo "Cancelled."; exit 0; }
+  echo ""
+fi
 
 for skill in "${SKILLS[@]}"; do
   src="$REPO_DIR/$skill/SKILL.md"
   [[ -f "$src" ]] || { warn "SKILL.md not found for '$skill' — skipping"; continue; }
 
-  if [[ "$PLATFORM" == "copilot" ]]; then
-    dest_dir="$TARGET/.github/skills/$skill"
-    dest="$dest_dir/SKILL.md"
-  elif [[ "$PLATFORM" == "copilot-global" ]]; then
-    dest_dir="$TARGET/$skill"
-    dest="$dest_dir/SKILL.md"
-  else
-    dest_dir="$TARGET"
-    dest="$dest_dir/$skill.md"
+  dest_dir="$ROOT/$skill"
+  dest="$dest_dir/SKILL.md"
+
+  if [[ "$PLATFORM" == "claude" && -f "$ROOT/$skill.md" ]]; then
+    warn "$skill — old flat file $(tilde "$ROOT/$skill.md") found. Claude Code reads $skill/SKILL.md, so delete the old file."
   fi
 
   mkdir -p "$dest_dir"
@@ -199,21 +317,16 @@ for skill in "${SKILLS[@]}"; do
   fi
 
   cp "$src" "$dest"
-  ok "$skill — done  ($dest)"
+  ok "$skill — done  ($(tilde "$dest"))"
 done
 
 echo ""
 echo "All done."
-
-if [[ "$PLATFORM" == "copilot" ]]; then
-  echo ""
-  echo "Next steps:"
-  echo "  1. Commit and push the .github/skills/ directory to GitHub"
-  echo "  2. Copilot will discover the skills automatically — no restart needed"
-  echo "  3. Trigger a skill by describing what you want in a Copilot chat"
-elif [[ "$PLATFORM" == "copilot-global" ]]; then
-  echo ""
-  echo "Next steps:"
-  echo "  1. Nothing to commit — these skills are now available in every repo"
-  echo "  2. Trigger a skill by describing what you want in a Copilot chat"
-fi
+echo ""
+echo "Next steps:"
+case "$PLATFORM:$SCOPE" in
+  copilot:project) echo "  1. Commit and push .github/skills/ so everyone on the repo gets the skills" ;;
+  claude:project)  echo "  1. Commit .claude/skills/ so everyone on the project gets the skills" ;;
+  *:global)        echo "  1. Nothing to commit. The skills are available in every project on this machine" ;;
+esac
+echo "  2. Trigger a skill by describing what you want. See each skill's README for example phrases"

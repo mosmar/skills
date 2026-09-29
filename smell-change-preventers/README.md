@@ -122,20 +122,23 @@ git clone https://github.com/mosmar/skills.git && cd skills
 ```
 
 **2. Install for your agent.** `install.sh` copies `smell-change-preventers/SKILL.md` to the right place.
+Run `./install.sh` for a menu, or pass the choices directly:
 
 ### Claude Code
 
 ```bash
-./install.sh --platform claude --target ~/.claude/skills smell-change-preventers             # every project
-./install.sh --platform claude --target <project>/.claude/skills smell-change-preventers     # one project
+./install.sh --claude --global smell-change-preventers                        # every project, nothing to commit
+./install.sh --claude --project --dir <project> smell-change-preventers       # one project, commit .claude/skills/
 ```
 
 ### GitHub Copilot
 
 ```bash
-./install.sh --platform copilot-global --target ~/.copilot/skills smell-change-preventers    # every repo, nothing to commit
-./install.sh --target <repo> smell-change-preventers                                         # one repo, commit .github/skills/
+./install.sh --copilot --global smell-change-preventers                       # every repo, nothing to commit
+./install.sh --copilot --project --dir <repo> smell-change-preventers         # one repo, commit .github/skills/
 ```
+
+To install every skill in this repo instead, use `all` in place of `smell-change-preventers` (recommended).
 
 ### Cowork
 
@@ -147,8 +150,9 @@ git clone https://github.com/mosmar/skills.git && cd skills
 The script only copies one file, so you can do it yourself from the repo root:
 
 ```bash
-# Claude Code
-cp smell-change-preventers/SKILL.md ~/.claude/skills/smell-change-preventers.md
+# Claude Code, every project
+mkdir -p ~/.claude/skills/smell-change-preventers
+cp smell-change-preventers/SKILL.md ~/.claude/skills/smell-change-preventers/
 
 # Copilot, every repo
 mkdir -p ~/.copilot/skills/smell-change-preventers

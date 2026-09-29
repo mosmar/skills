@@ -127,20 +127,23 @@ git clone https://github.com/mosmar/skills.git && cd skills
 ```
 
 **2. Install for your agent.** `install.sh` copies `smell-oo-abusers/SKILL.md` to the right place.
+Run `./install.sh` for a menu, or pass the choices directly:
 
 ### Claude Code
 
 ```bash
-./install.sh --platform claude --target ~/.claude/skills smell-oo-abusers             # every project
-./install.sh --platform claude --target <project>/.claude/skills smell-oo-abusers     # one project
+./install.sh --claude --global smell-oo-abusers                        # every project, nothing to commit
+./install.sh --claude --project --dir <project> smell-oo-abusers       # one project, commit .claude/skills/
 ```
 
 ### GitHub Copilot
 
 ```bash
-./install.sh --platform copilot-global --target ~/.copilot/skills smell-oo-abusers    # every repo, nothing to commit
-./install.sh --target <repo> smell-oo-abusers                                         # one repo, commit .github/skills/
+./install.sh --copilot --global smell-oo-abusers                       # every repo, nothing to commit
+./install.sh --copilot --project --dir <repo> smell-oo-abusers         # one repo, commit .github/skills/
 ```
+
+To install every skill in this repo instead, use `all` in place of `smell-oo-abusers` (recommended).
 
 ### Cowork
 
@@ -152,8 +155,9 @@ git clone https://github.com/mosmar/skills.git && cd skills
 The script only copies one file, so you can do it yourself from the repo root:
 
 ```bash
-# Claude Code
-cp smell-oo-abusers/SKILL.md ~/.claude/skills/smell-oo-abusers.md
+# Claude Code, every project
+mkdir -p ~/.claude/skills/smell-oo-abusers
+cp smell-oo-abusers/SKILL.md ~/.claude/skills/smell-oo-abusers/
 
 # Copilot, every repo
 mkdir -p ~/.copilot/skills/smell-oo-abusers

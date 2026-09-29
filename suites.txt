@@ -1,3 +1,4 @@
-# suite-name: entry-point skill first, then the rest. One suite per line.
-# Naming the first skill installs the whole suite (unless --no-deps).
-smell: smell-scanner smell-bloaters smell-oo-abusers smell-change-preventers smell-dispensables smell-couplers
+# group-name: entry-point skill first, then the rest. One group per line.
+# Install a group by name, e.g. ./install.sh --claude --global scanner
+scanner: smell-scanner smell-bloaters smell-oo-abusers smell-change-preventers smell-dispensables smell-couplers
+guard: smell-guard

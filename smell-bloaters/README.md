@@ -117,20 +117,23 @@ git clone https://github.com/mosmar/skills.git && cd skills
 ```
 
 **2. Install for your agent.** `install.sh` copies `smell-bloaters/SKILL.md` to the right place.
+Run `./install.sh` for a menu, or pass the choices directly:
 
 ### Claude Code
 
 ```bash
-./install.sh --platform claude --target ~/.claude/skills smell-bloaters             # every project
-./install.sh --platform claude --target <project>/.claude/skills smell-bloaters     # one project
+./install.sh --claude --global smell-bloaters                        # every project, nothing to commit
+./install.sh --claude --project --dir <project> smell-bloaters       # one project, commit .claude/skills/
 ```
 
 ### GitHub Copilot
 
 ```bash
-./install.sh --platform copilot-global --target ~/.copilot/skills smell-bloaters    # every repo, nothing to commit
-./install.sh --target <repo> smell-bloaters                                         # one repo, commit .github/skills/
+./install.sh --copilot --global smell-bloaters                       # every repo, nothing to commit
+./install.sh --copilot --project --dir <repo> smell-bloaters         # one repo, commit .github/skills/
 ```
+
+To install every skill in this repo instead, use `all` in place of `smell-bloaters` (recommended).
 
 ### Cowork
 
@@ -142,8 +145,9 @@ git clone https://github.com/mosmar/skills.git && cd skills
 The script only copies one file, so you can do it yourself from the repo root:
 
 ```bash
-# Claude Code
-cp smell-bloaters/SKILL.md ~/.claude/skills/smell-bloaters.md
+# Claude Code, every project
+mkdir -p ~/.claude/skills/smell-bloaters
+cp smell-bloaters/SKILL.md ~/.claude/skills/smell-bloaters/
 
 # Copilot, every repo
 mkdir -p ~/.copilot/skills/smell-bloaters

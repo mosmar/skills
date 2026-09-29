@@ -23,17 +23,20 @@ below run from its root folder.
 git clone https://github.com/mosmar/skills.git && cd skills
 ```
 
-**2. Install for your agent.**
+**2. Install for your agent.** Run `./install.sh` and pick **Guard**, or pass the choices
+directly:
 
 ```bash
 # GitHub Copilot
-./install.sh --platform copilot-global --target ~/.copilot/skills smell-guard   # every repo, nothing to commit
-./install.sh --target <repo> smell-guard                                        # one repo, commit .github/skills/
+./install.sh --copilot --global guard                      # every repo, nothing to commit
+./install.sh --copilot --project --dir <repo> guard        # one repo, commit .github/skills/
 
 # Claude Code
-./install.sh --platform claude --target ~/.claude/skills smell-guard            # every project
-./install.sh --platform claude --target <project>/.claude/skills smell-guard    # one project
+./install.sh --claude --global guard                       # every project, nothing to commit
+./install.sh --claude --project --dir <project> guard      # one project, commit .claude/skills/
 ```
+
+Use `all` instead of `guard` to add the smell-scanner group too (recommended).
 
 For more options, see [Install reference](#install-reference), including a manual install,
 always-on Copilot instructions, and instructions that apply only to TS/HTML/CSS files.
@@ -362,14 +365,15 @@ manual commands do the same thing.
 
 ```bash
 # Global — all projects
-cp smell-guard/SKILL.md ~/.claude/skills/smell-guard.md
+mkdir -p ~/.claude/skills/smell-guard
+cp smell-guard/SKILL.md ~/.claude/skills/smell-guard/SKILL.md
 
 # One project
-mkdir -p <project>/.claude/skills
-cp smell-guard/SKILL.md <project>/.claude/skills/smell-guard.md
+mkdir -p <project>/.claude/skills/smell-guard
+cp smell-guard/SKILL.md <project>/.claude/skills/smell-guard/SKILL.md
 ```
 
-Or use `./install.sh --platform claude --target <dir> smell-guard`.
+Or use `./install.sh --claude --global guard` or `./install.sh --claude --project --dir <project> guard`.
 
 ### GitHub Copilot: personal skill (all repos)
 
@@ -381,7 +385,7 @@ mkdir -p ~/.copilot/skills/smell-guard
 cp smell-guard/SKILL.md ~/.copilot/skills/smell-guard/SKILL.md
 ```
 
-Or use `./install.sh --platform copilot-global --target ~/.copilot/skills smell-guard`.
+Or use `./install.sh --copilot --global guard`.
 
 ### GitHub Copilot: repo skill (one repo)
 
@@ -390,7 +394,7 @@ mkdir -p <repo>/.github/skills/smell-guard
 cp smell-guard/SKILL.md <repo>/.github/skills/smell-guard/SKILL.md
 ```
 
-Or use `./install.sh --target <repo> smell-guard`. Copilot selects the skill from its
+Or use `./install.sh --copilot --project --dir <repo> guard`. Copilot selects the skill from its
 `description`.
 
 ### GitHub Copilot: always-on repo instructions
