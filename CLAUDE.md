@@ -1,6 +1,6 @@
 # skills repo — Claude Code context
 
-This is a personal library of agent skills that work in both **Claude Code** and **GitHub Copilot** (cloud agent) from the same `SKILL.md` file.
+This is a personal library of agent skills that work in both **Claude Code** and **GitHub Copilot** from the same `SKILL.md` file.
 
 ## Repo layout
 
