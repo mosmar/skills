@@ -34,10 +34,10 @@ EXAMPLES
   ./install.sh --suite smell
 
   # Install a specific skill
-  ./install.sh log-writer
+  ./install.sh smell-scanner
 
   # Install multiple skills into a given directory
-  ./install.sh --target ~/code/myproject log-writer tech-debt-tracker
+  ./install.sh --target ~/code/myproject smell-bloaters smell-couplers
 
   # Install all skills for Claude Code (global)
   ./install.sh --platform claude --target ~/.claude/skills

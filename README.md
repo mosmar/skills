@@ -1,6 +1,6 @@
 # skills
 
-A personal library of agent skills for developer workflows — code analysis, documentation, reporting, and more.
+A personal library of agent skills for detecting and refactoring code smells — fast triage, deep per-category analysis, and an agent-facing coding standard that prevents smells before they're written.
 
 Each skill is a self-contained `SKILL.md` file that works with **Claude Code**, **Cowork**, and **GitHub Copilot** (cloud agent) from the same file format — `name` and `description` are required by both.
 
@@ -8,10 +8,6 @@ Each skill is a self-contained `SKILL.md` file that works with **Claude Code**, 
 
 | Skill | Description |
 |---|---|
-| [tech-debt-tracker](./tech-debt-tracker/) | Audits code for technical debt across quality, security, dependencies, and test coverage |
-| [log-writer](./log-writer/) | Adds or improves logging using production best practices — right levels, structured output, context, no sensitive data |
-| [prompt-sharpener](./prompt-sharpener/) | Turns a vague Copilot ask into a tight, ready-to-paste prompt — fewer round trips, fewer premium requests burned |
-| [context-trimmer](./context-trimmer/) | Extracts the minimum viable code slices across files for a specific question — reduces token consumption on multi-file asks |
 | [smell-guard](./smell-guard/) | Agent-facing coding standard — prevents smells from being introduced while code is being written, with stack rules for Angular, NestJS, Express, MongoDB, and MSSQL |
 | [smell-scanner](./smell-scanner/) | Fast triage pass across all five code smell categories — rates each and routes to the right focused skill |
 | [smell-bloaters](./smell-bloaters/) | Deep analysis of Bloater smells — Long Method, Large Class, Primitive Obsession, Long Parameter List, Data Clumps |
@@ -45,9 +41,9 @@ Claude Code discovers skills in both locations automatically. Trigger by describ
 Copy the `SKILL.md` into `.github/skills/<skill-name>/` in your project:
 
 ```bash
-mkdir -p .github/skills/tech-debt-tracker
-curl -o .github/skills/tech-debt-tracker/SKILL.md \
-  https://raw.githubusercontent.com/mosmar/skills/main/tech-debt-tracker/SKILL.md
+mkdir -p .github/skills/smell-scanner
+curl -o .github/skills/smell-scanner/SKILL.md \
+  https://raw.githubusercontent.com/mosmar/skills/main/smell-scanner/SKILL.md
 ```
 
 Copilot automatically discovers skills in `.github/skills/` and selects the right one based on your prompt and the skill's `description`. The same install works for Copilot agent mode in VS Code — no extra steps. See the [GitHub docs](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills) for details.
