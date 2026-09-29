@@ -77,3 +77,7 @@ Both paths are auto-discovered by Claude Code; no restart required.
 ```
 
 `files` is an array of `{ "path": "...", "content": "..." }` objects for any fixture files the eval needs.
+
+## Commit messages
+
+Do not add `Co-Authored-By: Claude` (or any similar AI attribution line) to git commit messages or pull request descriptions in this repo.
