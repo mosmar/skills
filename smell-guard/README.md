@@ -125,7 +125,7 @@ flowchart LR
 | | Guards, interceptors and pipes for cross-cutting concerns | Shotgun Surgery |
 | | Config through `ConfigService` or the project's config module, never scattered `process.env` | Shotgun Surgery |
 | | Feature modules. Don't grow a god `SharedModule` (the scaffold's own shared module is fine). `forwardRef()` cycles get flagged | Large Class, Inappropriate Intimacy |
-| **Express** (brownfield) | Thin route handlers that call service functions | Long Method, Divergent Change |
+| **Express** | Thin route handlers that call service functions | Long Method, Divergent Change |
 | | One error middleware via `next(err)`, no try/catch in every route | Duplicate Code |
 | | Shared validation middleware or schema (zod / joi / express-validator) | Duplicate Code |
 | | One config module reads `process.env` | Shotgun Surgery |
@@ -262,7 +262,7 @@ export class OrdersService {
 }
 ```
 
-### Express (brownfield): adding to a fat router
+### Express: adding to a fat router
 
 *"Add a PATCH /orders/:id/cancel route"* to a router whose existing handlers mix
 validation, pricing and DB calls. smell-guard writes the **new** route cleanly and leaves
@@ -299,7 +299,7 @@ It won't rewrite the rest of the router, and it won't migrate it to NestJS, unle
 - **No library swaps.** It uses the data layer, validation, logging, HTTP, and state
   libraries you already have. It never replaces Mongoose or an ORM, and never adds a new
   one to satisfy a rule.
-- **Brownfield isn't a rewrite.** New code is written cleanly, existing smells are flagged,
+- **Existing code isn't a rewrite target.** New code is written cleanly, existing smells are flagged,
   and the architecture isn't touched unless you ask.
 
 ## Tuning it to your codebase
@@ -327,7 +327,7 @@ proportionality self-check tell the agent to add structure only when the code ha
 problem it solves, and eval 6 tests exactly that.
 
 **Will it try to migrate my Express app to NestJS?**
-No. In brownfield code it matches the existing structure, writes new code cleanly, and
+No. In existing code it matches the existing structure, writes new code cleanly, and
 only flags what it would change.
 
 **Does smell-scanner call the other smell skills?**
@@ -441,4 +441,4 @@ curl --create-dirs -o ~/.copilot/skills/smell-guard/SKILL.md \
 | File | Purpose |
 |---|---|
 | `SKILL.md` | Agent-facing coding standard: 5 smell categories, stack specifics, self-check |
-| `evals/evals.json` | Eight test cases: notification service (polymorphism), document processor (no temporary fields), extending a smelly switch (flag it), Angular order list, NestJS + MongoDB create-order endpoint, Express brownfield route, a trivial helper (no over-engineering), and NestJS + TypeORM/SQL Server orders with a transactional cancel |
+| `evals/evals.json` | Eight test cases: notification service (polymorphism), document processor (no temporary fields), extending a smelly switch (flag it), Angular order list, NestJS + MongoDB create-order endpoint, Express route, a trivial helper (no over-engineering), and NestJS + TypeORM/SQL Server orders with a transactional cancel |

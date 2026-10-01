@@ -55,7 +55,7 @@ Over-engineering is a smell too.
   the rules here when they conflict — you still don't refactor existing code unless asked,
   and still never swap libraries. There is no per-request switch to ignore the baseline
   while writing code; to refactor generated code, the user asks for that directly.
-- **Brownfield is not a rewrite.** In existing code (e.g. a legacy Express app), match its
+- **Existing code is not a rewrite target.** In existing code (e.g. an Express app), match its
   structure, write the *new* code cleanly, and flag surrounding smells per
   "When editing code that already has smells". Never migrate architecture (e.g. Express →
   NestJS) unless asked.
@@ -268,7 +268,7 @@ No `::ng-deep` or `!important` to reach into another component's styles — expo
 custom property or an input instead. Keep selectors shallow; `.page .card .header .title
 span` is a message chain through the DOM.
 
-### NestJS (greenfield)
+### NestJS
 
 **Controllers are thin** (Long Method, Divergent Change). A handler maps the request to one
 service call and returns the result. No business logic, no `@InjectModel` in controllers.
@@ -296,7 +296,7 @@ piece into its own provider or module rather than papering over it.
 **Providers respect the dependency limit.** The ~4 injected-dependency ceiling applies to
 constructor injection; more means the provider has more than one job.
 
-### Express / Node (brownfield)
+### Express / Node
 
 **Route handlers are thin** (Long Method, Divergent Change). Parse and validate input, call
 a service function, send the response. No business logic or database queries inline in
